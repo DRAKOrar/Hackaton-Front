@@ -1,0 +1,254 @@
+<!-- src/app/pages/products/product-form/product-form.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/products"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      {{ isEditMode ? 'Editar Producto' : 'Nuevo Producto' }}
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onCancel()" [disabled]="isSaving">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+
+  <!-- Formulario -->
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+
+    <!-- Información Básica -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información Básica</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <!-- Nombre -->
+          <ion-item [class.ion-invalid]="isFieldInvalid('name')">
+            <ion-label position="stacked">
+              Nombre del Producto *
+            </ion-label>
+            <ion-input
+              formControlName="name"
+              type="text"
+              placeholder="Ej: Laptop Dell Inspiron"
+              [clearInput]="true"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="isFieldInvalid('name')">
+              {{ getErrorMessage('name') }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Descripción -->
+          <ion-item>
+            <ion-label position="stacked">
+              Descripción
+            </ion-label>
+            <ion-textarea
+              formControlName="description"
+              placeholder="Descripción detallada del producto"
+              rows="3"
+              [counter]="true"
+              maxlength="500"
+            ></ion-textarea>
+          </ion-item>
+
+          <!-- Unidad de Medida -->
+          <ion-item [class.ion-invalid]="isFieldInvalid('unit')">
+            <ion-label position="stacked">
+              Unidad de Medida *
+            </ion-label>
+            <ion-select formControlName="unit" interface="action-sheet">
+              <ion-select-option *ngFor="let unit of units" [value]="unit">
+                {{ unit }}
+              </ion-select-option>
+            </ion-select>
+            <ion-note slot="error" *ngIf="isFieldInvalid('unit')">
+              {{ getErrorMessage('unit') }}
+            </ion-note>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Precios -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calculator-outline"></ion-icon>
+          Precios
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-grid>
+            <ion-row>
+              <!-- Precio de Compra -->
+              <ion-col size="12" sizeMd="6">
+                <ion-item [class.ion-invalid]="isFieldInvalid('purchasePrice')">
+                  <ion-label position="stacked">
+                    Precio de Compra *
+                  </ion-label>
+                  <ion-input
+                    formControlName="purchasePrice"
+                    type="number"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  >
+                    <div slot="start">$</div>
+                  </ion-input>
+                  <ion-note slot="error" *ngIf="isFieldInvalid('purchasePrice')">
+                    {{ getErrorMessage('purchasePrice') }}
+                  </ion-note>
+                </ion-item>
+              </ion-col>
+
+              <!-- Precio de Venta -->
+              <ion-col size="12" sizeMd="6">
+                <ion-item [class.ion-invalid]="isFieldInvalid('salePrice')">
+                  <ion-label position="stacked">
+                    Precio de Venta *
+                  </ion-label>
+                  <ion-input
+                    formControlName="salePrice"
+                    type="number"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  >
+                    <div slot="start">$</div>
+                  </ion-input>
+                  <ion-note slot="error" *ngIf="isFieldInvalid('salePrice')">
+                    {{ getErrorMessage('salePrice') }}
+                  </ion-note>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-list>
+
+        <!-- Indicadores de Ganancia -->
+        <div class="profit-indicators" *ngIf="productForm.get('purchasePrice')?.value > 0 || productForm.get('salePrice')?.value > 0">
+          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <ion-label>
+              Ganancia por unidad: ${{ profitPerUnit | number:'1.2-2' }}
+            </ion-label>
+          </ion-chip>
+          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'" outline>
+            <ion-label>
+              Margen: {{ profitMargin | number:'1.1-1' }}%
+            </ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Inventario -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Inventario</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-grid>
+            <ion-row>
+              <!-- Stock Actual -->
+              <ion-col size="12" sizeMd="6">
+                <ion-item [class.ion-invalid]="isFieldInvalid('stock')">
+                  <ion-label position="stacked">
+                    Stock Actual *
+                  </ion-label>
+                  <ion-input
+                    formControlName="stock"
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                  ></ion-input>
+                  <ion-note slot="error" *ngIf="isFieldInvalid('stock')">
+                    {{ getErrorMessage('stock') }}
+                  </ion-note>
+                  <ion-note slot="helper">
+                    Cantidad actual disponible
+                  </ion-note>
+                </ion-item>
+              </ion-col>
+
+              <!-- Stock Mínimo -->
+              <ion-col size="12" sizeMd="6">
+                <ion-item [class.ion-invalid]="isFieldInvalid('minStock')">
+                  <ion-label position="stacked">
+                    Stock Mínimo *
+                  </ion-label>
+                  <ion-input
+                    formControlName="minStock"
+                    type="number"
+                    placeholder="0"
+                    min="0"
+                  ></ion-input>
+                  <ion-note slot="error" *ngIf="isFieldInvalid('minStock')">
+                    {{ getErrorMessage('minStock') }}
+                  </ion-note>
+                  <ion-note slot="helper">
+                    Alerta cuando llegue a este nivel
+                  </ion-note>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+
+          <!-- Estado Activo/Inactivo (Solo en modo edición) -->
+          <ion-item *ngIf="isEditMode">
+            <ion-label>
+              <h2>Estado del Producto</h2>
+              <p>Los productos inactivos no aparecen en las ventas</p>
+            </ion-label>
+            <ion-chip [color]="productForm.get('active')?.value ? 'success' : 'medium'" slot="end">
+              <ion-icon [name]="productForm.get('active')?.value ? 'checkmark-outline' : 'close-outline'"></ion-icon>
+              <ion-label>{{ productForm.get('active')?.value ? 'Activo' : 'Inactivo' }}</ion-label>
+            </ion-chip>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons">
+      <ion-button
+        expand="block"
+        color="medium"
+        fill="outline"
+        (click)="onCancel()"
+        [disabled]="isSaving"
+      >
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Cancelar
+      </ion-button>
+
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="productForm.invalid || isSaving"
+      >
+        <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!isSaving" name="save-outline" slot="start"></ion-icon>
+        {{ isSaving ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Producto') }}
+      </ion-button>
+    </div>
+
+    <!-- Nota de campos requeridos -->
+    <div class="required-note">
+      <ion-note>* Campos requeridos</ion-note>
+    </div>
+  </form>
+</ion-content>

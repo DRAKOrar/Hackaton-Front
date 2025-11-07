@@ -76,7 +76,7 @@ private fb = inject(FormBuilder);
   ngOnInit(): void {
     // Si ya está autenticado, redirigir al home
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/home']);
+      this.router.navigate(['/inicio']);
     }
   }
 
@@ -101,7 +101,7 @@ private fb = inject(FormBuilder);
         next: (response) => {
           this.isLoading = false;
           console.log('Login exitoso', response);
-          this.router.navigate(['/home']);
+          this.router.navigate(['/inicio']);
         },
         error: (error) => {
           this.isLoading = false;

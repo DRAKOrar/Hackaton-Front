@@ -39,7 +39,7 @@
               </ion-item>
               <div class="field-error" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
                 <ion-icon name="alert-circle-outline"></ion-icon>
-                <span *ngIf="loginForm.get('username')?.errors?.['required']">El username es requerido.</span>
+                <span *ngIf="loginForm.get('username')?.errors?.['required']">El usuario es requerido.</span>
                 <span *ngIf="loginForm.get('username')?.errors?.['minlength']">Mínimo 3 caracteres.</span>
               </div>
             </div>

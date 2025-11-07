@@ -1,0 +1,218 @@
+<!-- src/app/pages/sales/sale-form/sale-form.page.html -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="success">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/sales"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      <ion-icon name="cart-outline"></ion-icon>
+      Registrar Venta
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onCancel()" [disabled]="isSaving">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
+
+    <!-- Selección de Producto -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="cube-outline"></ion-icon>
+          Producto
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <!-- Buscador de productos -->
+          <ion-item *ngIf="products.length > 5">
+            <ion-searchbar [(ngModel)]="searchTerm" (ionInput)="onSearchProducts($event)"
+              placeholder="Buscar producto..." [ngModelOptions]="{standalone: true}"></ion-searchbar>
+          </ion-item>
+
+          <!-- Selector de producto -->
+          <ion-item [class.ion-invalid]="isFieldInvalid('productId')">
+            <ion-label position="stacked">
+              Seleccionar Producto *
+            </ion-label>
+            <ion-select formControlName="productId" interface="action-sheet" placeholder="Elige un producto">
+              <ion-select-option *ngFor="let product of filteredProducts" [value]="product.id">
+                {{ product.name }} - Stock: {{ product.stock }} {{ product.unit }}
+              </ion-select-option>
+            </ion-select>
+            <ion-note slot="error" *ngIf="isFieldInvalid('productId')">
+              {{ getErrorMessage('productId') }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Loading productos -->
+          <ion-item *ngIf="isLoadingProducts">
+            <ion-label>
+              <ion-spinner name="crescent"></ion-spinner>
+              Cargando productos...
+            </ion-label>
+          </ion-item>
+
+          <!-- Sin productos disponibles -->
+          <ion-item *ngIf="!isLoadingProducts && products.length === 0">
+            <ion-label class="ion-text-wrap">
+              <p>No hay productos disponibles con stock.</p>
+              <p>Por favor, agrega productos primero.</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <!-- Info del producto seleccionado -->
+        <div *ngIf="selectedProduct" class="product-info">
+          <h3>{{ selectedProduct.name }}</h3>
+          <p *ngIf="selectedProduct.description">{{ selectedProduct.description }}</p>
+
+          <div class="product-details">
+            <ion-chip color="primary" outline>
+              <ion-icon name="cash-outline"></ion-icon>
+              <ion-label>Precio: ${{ selectedProduct.salePrice | number:'1.2-2' }}</ion-label>
+            </ion-chip>
+            <ion-chip [color]="selectedProduct.stock <= selectedProduct.minStock ? 'warning' : 'success'" outline>
+              <ion-icon name="cube-outline"></ion-icon>
+              <ion-label>Stock: {{ selectedProduct.stock }} {{ selectedProduct.unit }}</ion-label>
+            </ion-chip>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Detalles de la Venta -->
+    <ion-card *ngIf="selectedProduct">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calculator-outline"></ion-icon>
+          Detalles de la Venta
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <!-- Cantidad -->
+          <ion-item [class.ion-invalid]="isFieldInvalid('quantity')">
+            <ion-label position="stacked">
+              Cantidad *
+            </ion-label>
+            <ion-input formControlName="quantity" type="number" placeholder="1" min="1" [max]="selectedProduct.stock">
+              <div slot="end">{{ selectedProduct.unit }}</div>
+            </ion-input>
+            <ion-note slot="error" *ngIf="isFieldInvalid('quantity')">
+              {{ getErrorMessage('quantity') }}
+            </ion-note>
+            <ion-note slot="helper" *ngIf="!isFieldInvalid('quantity')">
+              Disponible: {{ selectedProduct.stock }} {{ selectedProduct.unit }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Precio Unitario -->
+          <ion-item [class.ion-invalid]="isFieldInvalid('unitPrice')">
+            <ion-label position="stacked">
+              Precio Unitario *
+            </ion-label>
+            <ion-input formControlName="unitPrice" type="number" placeholder="0.00" min="0" step="0.01">
+              <div slot="start">$</div>
+            </ion-input>
+            <ion-note slot="error" *ngIf="isFieldInvalid('unitPrice')">
+              {{ getErrorMessage('unitPrice') }}
+            </ion-note>
+            <ion-note slot="helper" *ngIf="!isFieldInvalid('unitPrice')">
+              Precio sugerido: ${{ selectedProduct.salePrice | number:'1.2-2' }}
+            </ion-note>
+          </ion-item>
+
+          <!-- Fecha de Venta -->
+          <ion-item button (click)="showDatePicker = true">
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Fecha de Venta</h3>
+              <p>{{ formatDate(saleForm.get('saleDate')?.value) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <!-- Notas -->
+          <ion-item>
+            <ion-label position="stacked">
+              Notas (Opcional)
+            </ion-label>
+            <ion-textarea formControlName="notes" placeholder="Información adicional sobre la venta"
+              rows="2"></ion-textarea>
+          </ion-item>
+        </ion-list>
+
+        <!-- Resumen de la venta -->
+        <div class="sale-summary">
+          <div class="summary-row">
+            <span>Total a Cobrar:</span>
+            <strong class="total-amount">${{ totalAmount | number:'1.2-2' }}</strong>
+          </div>
+
+          <div class="summary-row" *ngIf="estimatedProfit !== 0">
+            <span>Ganancia Estimada:</span>
+            <strong [class.profit-positive]="estimatedProfit > 0" [class.profit-negative]="estimatedProfit < 0">
+              ${{ estimatedProfit | number:'1.2-2' }}
+              ({{ profitMargin | number:'1.1-1' }}%)
+            </strong>
+          </div>
+
+          <div class="summary-row" *ngIf="saleForm.get('quantity')?.value > 0">
+            <span>Stock Restante:</span>
+            <ion-badge [color]="stockStatus">
+              {{ remainingStock }} {{ selectedProduct.unit }}
+            </ion-badge>
+          </div>
+
+          <!-- Alerta de stock bajo -->
+          <ion-chip *ngIf="willBeLowStock" color="warning" class="stock-warning">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <ion-label>¡Advertencia! El stock quedará por debajo del mínimo</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons" *ngIf="selectedProduct">
+      <ion-button expand="block" color="medium" fill="outline" (click)="onCancel()" [disabled]="isSaving">
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Cancelar
+      </ion-button>
+
+      <ion-button expand="block" color="success" type="submit" [disabled]="saleForm.invalid || isSaving">
+        <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!isSaving" name="checkmark-circle-outline" slot="start"></ion-icon>
+        {{ isSaving ? 'Registrando...' : 'Registrar Venta' }}
+      </ion-button>
+    </div>
+
+    <!-- Nota de campos requeridos -->
+    <div class="required-note">
+      <ion-note>* Campos requeridos</ion-note>
+    </div>
+  </form>
+
+  <!-- Modal para seleccionar fecha -->
+  <ion-modal [isOpen]="showDatePicker" (didDismiss)="showDatePicker = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Seleccionar Fecha</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="showDatePicker = false">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-datetime [value]="saleForm.get('saleDate')?.value" (ionChange)="onDateChange($event)"
+          presentation="date-time" [max]="maxDateIso" locale="es-ES"></ion-datetime>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</ion-content>
