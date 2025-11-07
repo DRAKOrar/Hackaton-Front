@@ -1,8 +1,9 @@
 // src/app/services/auth.service.ts
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { BehaviorSubject, catchError, Observable, tap, throwError } from 'rxjs';
 import { environment } from 'src/environment/environment';
+import { Router } from '@angular/router';
 
 export interface RegisterRequest {
   username: string;
@@ -23,6 +24,16 @@ export interface AuthResponse {
   token: string;
   username: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
+  expiresIn?: number;
+}
+
+export interface User {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
 }
 
 @Injectable({
@@ -30,37 +41,101 @@ export interface AuthResponse {
 })
 export class AuthService {
   private apiUrl = environment.apiUrl + '/api/auth';
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-  constructor(private http: HttpClient) { }
+  private authToken = new BehaviorSubject<string | null>(this.getTokenFromStorage());
+  private currentUser = new BehaviorSubject<User | null>(this.getUserFromStorage());
 
-  register(userData: RegisterRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userData);
+  public authToken$ = this.authToken.asObservable();
+  public currentUser$ = this.currentUser.asObservable();
+
+  register(userData: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData);
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          if (response.token) {
-            this.setToken(response.token);
-          }
+          this.handleAuthentication(response);
+        }),
+        catchError(error => {
+          this.clearAuthData();
+          return throwError(() => error);
         })
       );
   }
 
-  private setToken(token: string): void {
-    localStorage.setItem('authToken', token);
-  }
+  private handleAuthentication(response: AuthResponse): void {
+    // Guardar token en localStorage
+    localStorage.setItem('authToken', response.token);
+    localStorage.setItem('authData', JSON.stringify({
+      username: response.username,
+      email: response.email,
+      firstName: response.firstName,
+      lastName: response.lastName
+    }));
 
-  getToken(): string | null {
-    return localStorage.getItem('authToken');
+    // Actualizar BehaviorSubjects
+    this.authToken.next(response.token);
+    this.currentUser.next({
+      username: response.username,
+      email: response.email,
+      firstName: response.firstName || '',
+      lastName: response.lastName || ''
+    });
   }
 
   logout(): void {
+    this.clearAuthData();
+    this.router.navigate(['/login']);
+  }
+
+  private clearAuthData(): void {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('authData');
+    this.authToken.next(null);
+    this.currentUser.next(null);
+  }
+
+  private getTokenFromStorage(): string | null {
+    return localStorage.getItem('authToken');
+  }
+
+  private getUserFromStorage(): User | null {
+    const userData = localStorage.getItem('authData');
+    return userData ? JSON.parse(userData) : null;
+  }
+
+  getToken(): string | null {
+    return this.authToken.value;
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    // Aquí podrías agregar validación de expiración del token
+    return !!token;
+  }
+
+  // Verificar si el token está expirado (ejemplo básico)
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp * 1000; // Convertir a milisegundos
+      return Date.now() > exp;
+    } catch {
+      return true;
+    }
+  }
+
+  // Auto-logout si el token está expirado
+  checkTokenExpiration(): void {
+    if (this.isTokenExpired()) {
+      this.logout();
+    }
   }
 }

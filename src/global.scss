@@ -35,3 +35,26 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+:host {
+  --c-deep:   #155263;
+  --c-prim:   #FF6F3C; /* primary */
+  --c-sec:    #FF9A3C; /* secondary */
+  --c-acc:    #FFC93C; /* accent */
+
+  /* Aplica solo en esta página */
+  --ion-color-primary: var(--c-prim);
+  --ion-color-secondary: var(--c-sec);
+  --ion-color-tertiary: var(--c-acc);
+  --ion-toolbar-background: transparent;
+  --ion-background-color: #0e2630;
+  --ion-text-color: #f8fafc;
+}
+/* Paleta unificada */
+$brand-dark:   #132440;
+$brand-mid:    #16476A;
+$brand-teal:   #3B9797;
+$brand-accent: #BF092F;
+
+$text-strong:  #1f2a37;
+$text-muted:   #6b7280;
+$bg-soft:      #f5f7fa;

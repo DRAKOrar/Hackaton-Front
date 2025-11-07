@@ -1,0 +1,218 @@
+// src/app/pages/register/register.component.scss
+
+// Paleta (igual a la del login “sobrio”)
+$primary-color: #D97D55;
+$secondary-color: #F4E9D7;
+$tertiary-color: #B8C4A9;
+$accent-color: #6FA4AF;
+$success-color: #52c41a;
+$error-color: #e63946;
+$text-dark: #2d3436;
+$text-light: #636e72;
+
+// Animaciones suaves
+@keyframes fadeInDown { from {opacity:0; transform: translateY(-10px);} to {opacity:1; transform: translateY(0);} }
+@keyframes fadeInUp   { from {opacity:0; transform: translateY(10px);}  to {opacity:1; transform: translateY(0);} }
+@keyframes scaleIn    { from {transform: scale(.985); opacity:0;}       to {transform: scale(1);   opacity:1;} }
+
+// Header
+ion-header ion-toolbar {
+  --background: linear-gradient(135deg, #{$primary-color} 0%, #{$accent-color} 100%);
+  --color: white;
+
+  ion-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+}
+
+// Fondo + safe-area
+.register-content {
+  --background: linear-gradient(to bottom, #{$secondary-color} 0%, #ffffff 100%);
+  --padding-top: calc(16px + env(safe-area-inset-top));
+  --padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.register-container {
+  max-width: 780px;  // un poco más ancho que login por el grid
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+// Hero / bienvenida (sin flotaciones ni efectos)
+.welcome-section {
+  text-align: center;
+  padding: 1.5rem 1rem 1rem;
+  animation: fadeInDown .4s ease-out;
+
+  .icon-wrapper {
+    width: 90px; height: 90px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg, #{$primary-color}, #{$accent-color});
+    box-shadow: 0 8px 24px rgba($primary-color, .22);
+
+    ion-icon { font-size: 2.6rem; color: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.2)); }
+  }
+
+  h1 {
+    margin: 0 0 .3rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: $text-dark;
+  }
+
+  p {
+    margin: 0;
+    color: $text-light;
+    font-size: 1rem;
+  }
+}
+
+// Tarjeta del formulario (sin hover)
+.form-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  animation: scaleIn .35s ease-out .05s both;
+
+  ion-card-content { padding: 1.5rem 1.25rem; }
+}
+
+// Bloques de formulario
+.form-section {
+  &:not(:first-child) { margin-top: 1.25rem; }
+
+  .section-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: 1rem; font-weight: 700;
+    color: $text-dark; margin: 0 0 .75rem;
+
+    ion-icon { color: $primary-color; font-size: 1.2rem; }
+  }
+}
+
+// Grupos de input (sin hover; foco sutil)
+.input-group {
+  margin-bottom: 1rem;
+  animation: fadeInUp .3s ease-out both;
+
+  ion-item {
+    --background: #{$secondary-color};
+    --border-radius: 14px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+    --inner-padding-end: 8px;
+    --min-height: 56px;
+    border-radius: 14px;
+    transition: box-shadow .12s ease;
+
+    &::part(native) { border-radius: 14px; }
+
+    // foco sutil, sin “subir/bajar” el elemento
+    &:focus-within { box-shadow: 0 0 0 3px rgba($primary-color, .18); }
+
+    &.error { --background: #{lighten($error-color, 48%)}; }
+
+    ion-icon[slot="start"] {
+      font-size: 1.4rem;
+      color: $accent-color;
+      margin-right: 6px;
+    }
+
+    ion-label { color: $text-light; font-weight: 500; }
+    ion-input {
+      --color: #{$text-dark};
+      --placeholder-color: #{lighten($text-light, 15%)};
+      --placeholder-opacity: .7;
+      font-size: 1rem; font-weight: 500;
+    }
+  }
+
+  .error-note {
+    margin-top: .5rem;
+    background: lighten($error-color, 48%);
+    border-radius: 10px;
+    padding: .6rem .9rem;
+    color: $error-color;
+    font-size: .86rem;
+    font-weight: 500;
+    display: grid; gap: .35rem;
+
+    ion-icon { font-size: 1rem; margin-right: .35rem; vertical-align: middle; }
+    div { display: flex; align-items: center; }
+  }
+}
+
+// Botonera
+.button-container {
+  margin-top: 1rem;
+  display: grid;
+  gap: .75rem;
+  animation: fadeInUp .35s ease-out .2s both;
+}
+
+// Submit (sin hover; active leve)
+.submit-button {
+  --background: linear-gradient(135deg, #{$primary-color} 0%, #{$accent-color} 100%);
+  --background-activated: linear-gradient(135deg, #{darken($primary-color, 8%)} 0%, #{darken($accent-color, 8%)} 100%);
+  --color: white;
+  --border-radius: 14px;
+  --padding-top: 16px; --padding-bottom: 16px;
+  --box-shadow: 0 6px 18px rgba(#{$primary-color}, .30);
+
+  font-weight: 600; font-size: 1.05rem; letter-spacing: .3px;
+  transition: transform .08s ease, box-shadow .12s ease;
+
+  &:active:not([disabled]) { transform: translateY(1px); --box-shadow: 0 4px 14px rgba(#{$primary-color}, .28); }
+  &[disabled] { opacity: .55; }
+}
+
+// Link “¿Ya tienes cuenta?” (sin hover)
+.login-button {
+  --color: #{$primary-color};
+  text-transform: none;
+  font-weight: 600;
+
+  &:focus-visible { outline: 2px solid rgba($primary-color, .35); border-radius: 12px; }
+}
+
+// Ajustes del grid
+ion-grid.ion-no-padding { padding: 0; }
+
+// Responsive
+@media (max-width: 576px) {
+  .register-container { padding: .5rem; }
+  .welcome-section {
+    padding: 1.25rem 1rem .75rem;
+    .icon-wrapper { width: 80px; height: 80px; ion-icon { font-size: 2.3rem; } }
+    h1 { font-size: 1.65rem; }
+    p  { font-size: .95rem; }
+  }
+  .form-card ion-card-content { padding: 1.35rem 1rem; }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .register-content { --background: linear-gradient(to bottom, #{darken($text-dark, 6%)} 0%, #{$text-dark} 100%); }
+  .form-card { background: lighten($text-dark, 8%); }
+  .welcome-section p { color: lighten($text-light, 20%); }
+
+  .input-group ion-item {
+    --background: #{lighten($text-dark, 12%)};
+    ion-label { color: lighten($text-light, 30%); }
+    ion-input { --color: #fff; }
+  }
+  .error-note { background: rgba($error-color, .15); color: lighten($error-color, 15%); }
+}
+
+// Menos movimiento si el usuario lo prefiere
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

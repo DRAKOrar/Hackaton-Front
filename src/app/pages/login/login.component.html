@@ -1,3 +1,123 @@
-<p>
-  login works!
-</p>
+<ion-header class="ion-no-border">
+  <ion-toolbar style="--background:#132440; --color:#fff;">
+    <ion-title>Iniciar sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="login-content">
+  <div class="layout">
+
+    <!-- Columna izquierda: Hero / Branding -->
+    <section class="brand-pane">
+      <div class="brand-card">
+        <div class="brand-logo">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+        </div>
+        <h1 class="brand-title">Bienvenido de vuelta</h1>
+        <p class="brand-subtitle">Ingresa tus credenciales para continuar</p>
+      </div>
+    </section>
+
+    <!-- Columna derecha: Formulario -->
+    <section class="form-pane">
+      <ion-card class="login-card">
+        <ion-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+            <!-- Username -->
+            <div class="field">
+              <ion-label class="field-label">Usuario</ion-label>
+              <ion-item lines="none" class="field-item"
+                [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+                <ion-icon name="person-outline" slot="start" class="field-icon"></ion-icon>
+                <ion-input
+                  formControlName="username"
+                  type="text"
+                  autocomplete="username"
+                  placeholder="Tu usuario">
+                </ion-input>
+              </ion-item>
+              <div class="field-error" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <span *ngIf="loginForm.get('username')?.errors?.['required']">El username es requerido.</span>
+                <span *ngIf="loginForm.get('username')?.errors?.['minlength']">Mínimo 3 caracteres.</span>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="field">
+              <ion-label class="field-label">Contraseña</ion-label>
+              <ion-item lines="none" class="field-item"
+                [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                <ion-icon name="lock-closed-outline" slot="start" class="field-icon"></ion-icon>
+                <ion-input
+                  formControlName="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  autocomplete="current-password"
+                  placeholder="Tu contraseña">
+                </ion-input>
+                <ion-button fill="clear" slot="end" class="plain-button" (click)="togglePassword()" aria-label="Mostrar/Ocultar contraseña">
+                  <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </ion-button>
+              </ion-item>
+              <div class="field-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <span *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida.</span>
+                <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Mínimo 6 caracteres.</span>
+              </div>
+            </div>
+
+            <!-- Enlaces auxiliares -->
+            <div class="row-between">
+              <ion-button fill="clear" size="small" class="muted-link">¿Olvidaste tu contraseña?</ion-button>
+            </div>
+
+            <!-- Botón principal -->
+            <ion-button
+              type="submit"
+              expand="block"
+              [disabled]="loginForm.invalid || isLoading"
+              class="btn-primary">
+              <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+              <span *ngIf="!isLoading">
+                <ion-icon name="log-in-outline"></ion-icon>
+                Iniciar sesión
+              </span>
+            </ion-button>
+
+            <!-- Botón de pruebas (solo dev) -->
+            <ion-button
+              *ngIf="!environment.production"
+              expand="block"
+              fill="outline"
+              class="btn-ghost"
+              (click)="fillTestCredentials()">
+              <ion-icon name="code-slash-outline" slot="start"></ion-icon>
+              Usar credenciales de prueba
+            </ion-button>
+          </form>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Línea y registro -->
+      <div class="separator"><span>o</span></div>
+
+      <div class="register-row">
+        <p>¿No tienes una cuenta?</p>
+        <ion-button routerLink="/register" routerDirection="forward" fill="clear" class="muted-link">
+          <ion-icon name="person-add-outline" slot="start"></ion-icon>
+          Crear cuenta nueva
+        </ion-button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Alert de error -->
+  <ion-alert
+    [isOpen]="showErrorAlert"
+    header="Error de autenticación"
+    [message]="errorMessage"
+    [buttons]="['Entendido']"
+    (didDismiss)="onAlertDismiss()">
+  </ion-alert>
+</ion-content>

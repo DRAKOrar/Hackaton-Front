@@ -1,0 +1,309 @@
+/* ===========================
+   Paleta
+   =========================== */
+$brand-dark:   #132440;
+$brand-mid:    #16476A;
+$brand-teal:   #3B9797;
+$brand-accent: #BF092F;
+
+$text-strong:  #1f2a37;
+$text-muted:   #6b7280;
+$bg-soft:      #f5f7fa;
+
+/* ===========================
+   Animaciones suaves
+   =========================== */
+@keyframes fadeInUp { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+@keyframes scaleIn  { from {transform: scale(.985); opacity:0;}     to {transform: scale(1);   opacity:1;} }
+
+/* ===========================
+   Header (opcional: quita inline del HTML)
+   =========================== */
+ion-header ion-toolbar {
+  --background: #132440;
+  --color: #fff;
+}
+
+/* ===========================
+   Fondo + safe-area
+   =========================== */
+.login-content {
+  --background: linear-gradient(to bottom, #{$bg-soft} 0%, #ffffff 100%);
+  --padding-top: calc(16px + env(safe-area-inset-top));
+  --padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+/* ===========================
+   GRID: centra y fija columnas
+   =========================== */
+.layout {
+  /* Altura visible menos toolbar (≈56px) */
+  min-height: calc(100vh - 56px);
+  max-width: 1080px;                 /* contenedor central */
+  margin-inline: auto;
+  padding: clamp(12px, 2.5vw, 24px);
+
+  display: grid;
+  /* columnas con límites: izquierda (branding), derecha (form) */
+  grid-template-columns: minmax(320px, 420px) minmax(360px, 520px);
+  gap: clamp(16px, 3vw, 32px);
+
+  justify-content: center;   /* centra horizontal */
+  align-content: center;     /* centra vertical */
+}
+
+/* ===========================
+   Paneles
+   =========================== */
+.brand-pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-pane {
+  display: flex;
+  flex-direction: column;     /* <— CORRECCIÓN CLAVE */
+  align-items: center;
+  justify-content: center;
+  gap: 12px;                  /* separación entre card / separador / registro */
+}
+
+/* ===========================
+   Brand / Hero
+   =========================== */
+.brand-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  padding: clamp(18px, 3vw, 28px);
+  text-align: center;
+  animation: scaleIn .35s ease-out .05s both;
+}
+
+.brand-logo {
+  width: 96px; height: 96px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #{$brand-mid}, #{$brand-teal});
+  box-shadow: 0 10px 28px rgba(22, 71, 106, .25);
+
+  ion-icon { font-size: 2.6rem; color: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,.18)); }
+}
+
+.brand-title {
+  margin: 8px 0 6px;
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 800;
+  color: $text-strong;
+}
+
+.brand-subtitle {
+  margin: 0;
+  color: $text-muted;
+  font-size: clamp(.95rem, 1.6vw, 1rem);
+}
+
+/* ===========================
+   Card de formulario
+   =========================== */
+.login-card {
+  width: 100%;                  /* ocupa toda la columna */
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+  animation: scaleIn .35s ease-out .05s both;
+
+  ion-card-content { padding: clamp(18px, 3vw, 28px); }
+}
+
+/* ===========================
+   Campos
+   =========================== */
+.field { margin-bottom: clamp(12px, 2vw, 16px); animation: fadeInUp .35s ease-out both; }
+
+.field-label {
+  display: inline-block;
+  margin: 0 0 6px 2px;
+  font-weight: 700;
+  color: $text-strong;
+  font-size: .95rem;
+}
+
+.field-item {
+  --background: #eef4f7;
+  --border-radius: 14px;
+  --padding-start: 14px;
+  --padding-end: 12px;
+  --inner-padding-end: 6px;
+  --min-height: 56px;
+  border-radius: 14px;
+  transition: box-shadow .12s ease;
+
+  &::part(native) { border-radius: 14px; }
+  &:focus-within { box-shadow: 0 0 0 3px rgba($brand-mid, .18); }
+  &.is-invalid   { --background: #fde8ec; }
+}
+
+.field-icon { font-size: 1.35rem; color: $brand-teal; margin-right: 6px; }
+
+ion-input {
+  --color: #{$text-strong};
+  --placeholder-color: #{rgba($text-muted,.9)};
+  --placeholder-opacity: .8;
+  font-size: 1rem; font-weight: 500;
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: 8px;
+  padding: .6rem .9rem;
+  background: #fde8ec;
+  color: $brand-accent;
+  border-radius: 10px;
+  font-size: .88rem;
+  font-weight: 600;
+
+  ion-icon { font-size: 1rem; flex-shrink: 0; }
+}
+
+/* Botón “ojo” plano */
+.plain-button {
+  --color: #6b7280;
+  margin: 0;
+  --padding-start: 6px; --padding-end: 6px;
+  &:focus-visible { outline: 2px solid rgba($brand-mid,.35); border-radius: 10px; }
+}
+
+/* ===========================
+   Enlaces auxiliares
+   =========================== */
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 6px 0 12px;
+}
+
+.muted-link {
+  --color: #6b7280;
+  text-transform: none;
+  font-weight: 600;
+  padding-inline: 0;
+  &:focus-visible { outline: 2px solid rgba($brand-mid,.35); border-radius: 10px; }
+}
+
+/* ===========================
+   Botones
+   =========================== */
+.btn-primary {
+  --background: linear-gradient(135deg, #{$brand-mid} 0%, #{$brand-teal} 100%);
+  --background-activated: linear-gradient(135deg, #{darken($brand-mid, 8%)} 0%, #{darken($brand-teal, 8%)} 100%);
+  --color: #fff;
+  --border-radius: 14px;
+  --padding-top: 16px; --padding-bottom: 16px;
+  --box-shadow: 0 6px 18px rgba(22, 71, 106, .28);
+
+  font-weight: 700;
+  letter-spacing: .2px;
+  transition: transform .08s ease, box-shadow .12s ease;
+
+  &:active:not([disabled]) { transform: translateY(1px); --box-shadow: 0 4px 14px rgba(22,71,106,.26); }
+  &[disabled] { opacity: .55; }
+}
+
+.btn-ghost {
+  --border-color: #{$brand-teal};
+  --color: #{$brand-mid};
+  --border-radius: 14px;
+  --border-width: 2px;
+  --padding-top: 14px; --padding-bottom: 14px;
+  font-weight: 600;
+  &:focus-visible { outline: 2px solid rgba($brand-mid,.35); border-radius: 12px; }
+}
+
+/* ===========================
+   Separador + registro (mismo ancho que la card)
+   =========================== */
+.separator,
+.register-row {
+  width: 100%;
+  max-width: 520px;    /* igual al máximo de la card de login */
+}
+
+.separator {
+  display: flex; align-items: center; justify-content: center;
+  margin: clamp(12px, 2.2vw, 18px) 0;
+
+  &::before, &::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(to right, transparent, rgba($text-muted,.25), transparent);
+  }
+  span { padding: 0 10px; color: $text-muted; font-weight: 600; }
+}
+
+.register-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: .5rem; color: $text-muted;
+
+  .muted-link {
+    --color: #{$brand-mid};
+    font-weight: 700;
+    &:focus-visible { outline: 2px solid rgba($brand-mid,.35); border-radius: 10px; }
+  }
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+@media (max-width: 920px) {
+  .layout {
+    grid-template-columns: minmax(320px, 560px);  /* 1 columna */
+    gap: 16px;
+    align-content: start;
+    padding-top: 20px;
+  }
+  .brand-card,
+  .login-card,
+  .separator,
+  .register-row { max-width: 560px; }
+}
+
+@media (max-width: 480px) {
+  .brand-logo { width: 84px; height: 84px; ion-icon { font-size: 2.3rem; } }
+  .brand-title { font-size: 1.5rem; }
+}
+
+/* ===========================
+   Dark Mode
+   =========================== */
+@media (prefers-color-scheme: dark) {
+  .login-content { --background: linear-gradient(to bottom, #{lighten($brand-dark, 2%)} 0%, #{$brand-dark} 100%); }
+
+  .brand-card,
+  .login-card {
+    background: #{lighten($brand-dark, 8%)};
+    box-shadow: 0 8px 26px rgba(0,0,0,.35);
+  }
+
+  .brand-title { color: #e5e7eb; }
+  .brand-subtitle { color: #cbd5e1; }
+
+  .field-item { --background: #{lighten($brand-dark, 14%)}; }
+  ion-input { --color: #fff; }
+  .field-label { color: #e5e7eb; }
+  .field-error { background: rgba($brand-accent,.18); color: #ff9aa9; }
+  .separator::before, .separator::after { background: linear-gradient(to right, transparent, rgba(#cbd5e1,.25), transparent); }
+  .register-row { color: #cbd5e1; }
+}
+
+/* ===========================
+   Menos movimiento
+   =========================== */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

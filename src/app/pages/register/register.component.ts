@@ -15,8 +15,7 @@ import {
   IonInput,
   IonNote,
   IonButton,
-  IonDatetime, IonSpinner
-} from '@ionic/angular/standalone';
+  IonDatetime, IonSpinner, IonIcon, IonCol, IonRow, IonProgressBar, IonGrid, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonButtons } from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
 function pastDateValidator(control: AbstractControl): ValidationErrors | null {
   const v = control.value as string | null;
@@ -33,7 +32,7 @@ function pastDateValidator(control: AbstractControl): ValidationErrors | null {
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  imports: [IonSpinner, CommonModule, FormsModule, ReactiveFormsModule, IonHeader,
+  imports: [IonButtons, IonCardContent, IonCardTitle, IonCardSubtitle, IonCardHeader, IonCard, IonGrid, IonProgressBar, IonRow, IonCol, IonIcon, IonSpinner, CommonModule, FormsModule, ReactiveFormsModule, IonHeader,
     IonToolbar,
     IonTitle,
     IonContent,
