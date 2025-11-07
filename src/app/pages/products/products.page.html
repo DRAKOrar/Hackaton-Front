@@ -1,69 +1,78 @@
 <!-- src/app/pages/products/products.page.html -->
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-title>
-      <ion-icon name="cube-outline" slot="start"></ion-icon>
+<ion-header [translucent]="true" class="custom-header">
+  <ion-toolbar class="brand-toolbar">
+    <ion-title class="page-title">
+      <ion-icon name="cube-outline" class="title-icon"></ion-icon>
       Productos
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="loadProducts()">
-        <ion-icon name="arrow-down-outline" slot="icon-only"></ion-icon>
+      <ion-button (click)="loadProducts()" class="refresh-btn" fill="clear">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 
   <!-- Barra de búsqueda -->
-  <ion-toolbar>
+  <ion-toolbar class="search-toolbar">
     <ion-searchbar
       [(ngModel)]="searchTerm"
       (ionInput)="onSearch($event)"
       placeholder="Buscar productos..."
-      animated
+      class="custom-searchbar"
     ></ion-searchbar>
   </ion-toolbar>
 
   <!-- Segmento de filtros -->
-  <ion-toolbar>
-    <ion-segment [(ngModel)]="selectedFilter" (ionChange)="onFilterChange($event)">
-      <ion-segment-button value="all">
+  <ion-toolbar class="filter-toolbar">
+    <ion-segment [(ngModel)]="selectedFilter" (ionChange)="onFilterChange($event)" class="custom-segment">
+      <ion-segment-button value="all" class="segment-btn">
         <ion-label>Todos</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="active">
+      <ion-segment-button value="active" class="segment-btn">
         <ion-label>Activos</ion-label>
       </ion-segment-button>
-      <ion-segment-button value="lowStock">
-        <ion-label>
+      <ion-segment-button value="lowStock" class="segment-btn">
+        <ion-label class="low-stock-label">
           Stock Bajo
-          <ion-badge *ngIf="lowStockCount > 0" color="danger">{{ lowStockCount }}</ion-badge>
+          <ion-badge *ngIf="lowStockCount > 0" class="low-stock-badge">{{ lowStockCount }}</ion-badge>
         </ion-label>
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="custom-content">
   <!-- Pull to refresh -->
-  <ion-refresher slot="fixed" (ionRefresh)="loadProducts($event)">
-    <ion-refresher-content></ion-refresher-content>
+  <ion-refresher slot="fixed" (ionRefresh)="loadProducts($event)" class="custom-refresher">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Tira para actualizar"
+      refreshingSpinner="crescent"
+      refreshingText="Actualizando..."
+    ></ion-refresher-content>
   </ion-refresher>
 
   <!-- Resumen estadístico -->
   <div class="stats-container">
-    <ion-card>
-      <ion-card-content>
+    <ion-card class="stats-card">
+      <ion-card-content class="stats-content">
         <div class="stats-grid">
           <div class="stat-item">
-            <ion-icon name="cube-outline" color="primary"></ion-icon>
-            <div>
-              <h2>{{ totalProducts }}</h2>
-              <p>Productos activos</p>
+            <div class="stat-icon-container">
+              <ion-icon name="cube-outline" class="stat-icon"></ion-icon>
+            </div>
+            <div class="stat-text">
+              <h2 class="stat-value">{{ totalProducts }}</h2>
+              <p class="stat-label">Productos activos</p>
             </div>
           </div>
           <div class="stat-item">
-            <ion-icon name="warning-outline" [color]="lowStockCount > 0 ? 'danger' : 'medium'"></ion-icon>
-            <div>
-              <h2>{{ lowStockCount }}</h2>
-              <p>Stock bajo</p>
+            <div class="stat-icon-container">
+              <ion-icon name="warning-outline" class="stat-icon" [class.low-stock]="lowStockCount > 0"></ion-icon>
+            </div>
+            <div class="stat-text">
+              <h2 class="stat-value">{{ lowStockCount }}</h2>
+              <p class="stat-label">Stock bajo</p>
             </div>
           </div>
         </div>
@@ -72,63 +81,70 @@
   </div>
 
   <!-- Loading skeleton -->
-  <div *ngIf="isLoading">
-    <ion-card *ngFor="let item of [1,2,3]">
+  <div *ngIf="isLoading" class="skeleton-container">
+    <ion-card *ngFor="let item of [1,2,3]" class="skeleton-card">
       <ion-card-header>
-        <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
+        <ion-skeleton-text animated class="skeleton-title"></ion-skeleton-text>
       </ion-card-header>
       <ion-card-content>
-        <ion-skeleton-text animated style="width: 80%"></ion-skeleton-text>
-        <ion-skeleton-text animated style="width: 70%"></ion-skeleton-text>
+        <ion-skeleton-text animated class="skeleton-text"></ion-skeleton-text>
+        <ion-skeleton-text animated class="skeleton-text short"></ion-skeleton-text>
       </ion-card-content>
     </ion-card>
   </div>
 
   <!-- Lista de productos -->
-  <ion-list *ngIf="!isLoading && filteredProducts.length > 0">
-    <ion-item-sliding *ngFor="let product of filteredProducts">
-      <ion-item button (click)="viewProduct(product)">
-        <ion-icon name="cube-outline" slot="start" [color]="product.active ? 'primary' : 'medium'"></ion-icon>
+  <ion-list *ngIf="!isLoading && filteredProducts.length > 0" class="products-list">
+    <ion-item-sliding *ngFor="let product of filteredProducts" class="product-slide">
+      <ion-item button (click)="viewProduct(product)" class="product-item" [class.inactive]="!product.active">
+        <div class="product-status-indicator" [class.active]="product.active" [class.low-stock]="isLowStock(product) && product.active"></div>
 
-        <ion-label>
-          <h2>
-            {{ product.name }}
-            <ion-badge *ngIf="!product.active" color="medium">Inactivo</ion-badge>
-            <ion-badge *ngIf="isLowStock(product) && product.active" color="danger">
-              <ion-icon name="warning-outline"></ion-icon>
-              Stock bajo
-            </ion-badge>
-          </h2>
-          <p *ngIf="product.description">{{ product.description }}</p>
+        <ion-icon name="cube-outline" slot="start" class="product-icon" [class.active]="product.active"></ion-icon>
+
+        <ion-label class="product-label">
+          <div class="product-header">
+            <h2 class="product-name">{{ product.name }}</h2>
+            <div class="product-badges">
+              <ion-badge *ngIf="!product.active" class="inactive-badge">Inactivo</ion-badge>
+              <ion-badge *ngIf="isLowStock(product) && product.active" class="low-stock-badge">
+                <ion-icon name="warning-outline"></ion-icon>
+                Stock bajo
+              </ion-badge>
+            </div>
+          </div>
+
+          <p *ngIf="product.description" class="product-description">{{ product.description }}</p>
 
           <div class="product-details">
-            <ion-chip color="success" outline>
+            <ion-chip color="success" outline class="detail-chip">
               <ion-icon name="cash-outline"></ion-icon>
               <ion-label>Venta: ${{ product.salePrice | number:'1.2-2' }}</ion-label>
             </ion-chip>
-            <ion-chip color="primary" outline>
+            <ion-chip color="primary" outline class="detail-chip">
               <ion-icon name="cart-outline"></ion-icon>
               <ion-label>Stock: {{ product.stock }} {{ product.unit }}</ion-label>
             </ion-chip>
-            <ion-chip [color]="getProfitMargin(product) > 0 ? 'success' : 'danger'" outline>
+            <ion-chip [color]="getProfitMargin(product) > 0 ? 'success' : 'danger'" outline class="detail-chip">
               <ion-icon name="trending-up-outline"></ion-icon>
               <ion-label>Margen: {{ getProfitMargin(product) | number:'1.1-1' }}%</ion-label>
             </ion-chip>
           </div>
         </ion-label>
 
-        <ion-badge slot="end" [color]="getStockStatus(product)">
+        <ion-badge slot="end" class="stock-badge" [class]="getStockStatus(product)">
           {{ product.stock }}
         </ion-badge>
       </ion-item>
 
       <!-- Opciones de deslizar -->
-      <ion-item-options side="end">
-        <ion-item-option color="primary" (click)="editProduct(product)">
-          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+      <ion-item-options side="end" class="slide-options">
+        <ion-item-option color="primary" (click)="editProduct(product)" class="edit-option">
+          <ion-icon name="create-outline" slot="icon-only" class="option-icon"></ion-icon>
+          <span class="option-text">Editar</span>
         </ion-item-option>
-        <ion-item-option color="danger" (click)="deleteProduct(product)">
-          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        <ion-item-option color="danger" (click)="deleteProduct(product)" class="delete-option">
+          <ion-icon name="trash-outline" slot="icon-only" class="option-icon"></ion-icon>
+          <span class="option-text">Eliminar</span>
         </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
@@ -136,20 +152,22 @@
 
   <!-- Empty state -->
   <div *ngIf="!isLoading && filteredProducts.length === 0" class="empty-state">
-    <ion-icon name="cube-outline" color="medium"></ion-icon>
-    <h2>No hay productos</h2>
-    <p *ngIf="searchTerm">No se encontraron productos con "{{ searchTerm }}"</p>
-    <p *ngIf="!searchTerm">Agrega tu primer producto para comenzar</p>
-    <ion-button (click)="addProduct()" fill="outline">
+    <div class="empty-icon-container">
+      <ion-icon name="cube-outline" class="empty-icon"></ion-icon>
+    </div>
+    <h2 class="empty-title">No hay productos</h2>
+    <p class="empty-text" *ngIf="searchTerm">No se encontraron productos con "{{ searchTerm }}"</p>
+    <p class="empty-text" *ngIf="!searchTerm">Agrega tu primer producto para comenzar</p>
+    <ion-button (click)="addProduct()" fill="outline" class="empty-action-btn">
       <ion-icon name="add-outline" slot="start"></ion-icon>
       Agregar Producto
     </ion-button>
   </div>
 
   <!-- FAB para agregar producto -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="addProduct()" color="primary">
-      <ion-icon name="add-outline"></ion-icon>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="add-fab">
+    <ion-fab-button (click)="addProduct()" class="fab-btn">
+      <ion-icon name="add-outline" class="fab-icon"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>

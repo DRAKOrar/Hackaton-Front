@@ -1,4 +1,3 @@
-// src/app/pages/products/products.page.ts
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -48,8 +47,7 @@ import {
   eyeOutline,
   arrowDownOutline,
   cashOutline,
-  cartOutline
-} from 'ionicons/icons';
+  cartOutline, refreshOutline } from 'ionicons/icons';
 import { Product, ProductService } from '../../services/product-service';
 
 @Component({
@@ -103,20 +101,7 @@ export class ProductsPage implements OnInit {
   selectedFilter: 'all' | 'active' | 'lowStock' = 'all';
 
   constructor() {
-    addIcons({
-      addOutline,
-      searchOutline,
-      filterOutline,
-      cubeOutline,
-      trendingUpOutline,
-      warningOutline,
-      createOutline,
-      trashOutline,
-      eyeOutline,
-      arrowDownOutline,
-      cashOutline,
-      cartOutline
-    });
+    addIcons({cubeOutline,refreshOutline,warningOutline,cashOutline,cartOutline,trendingUpOutline,createOutline,trashOutline,addOutline,searchOutline,filterOutline,eyeOutline,arrowDownOutline});
   }
 
   ngOnInit() {

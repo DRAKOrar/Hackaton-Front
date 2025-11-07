@@ -1,0 +1,240 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/products"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalles del Producto</ion-title>
+    <ion-buttons slot="end" *ngIf="product && !isLoading">
+      <ion-button (click)="onEdit()">
+        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="onDelete()" color="danger">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+
+  <!-- Product Details -->
+  <div *ngIf="!isLoading && product">
+    <!-- Información Principal -->
+    <ion-card>
+      <ion-card-header>
+        <div class="card-header-content">
+          <ion-card-title>{{ product.name }}</ion-card-title>
+          <ion-badge [color]="product.active ? 'success' : 'danger'">
+            {{ product.active ? 'Activo' : 'Inactivo' }}
+          </ion-badge>
+        </div>
+        <p class="product-description" *ngIf="product.description">
+          {{ product.description }}
+        </p>
+      </ion-card-header>
+    </ion-card>
+
+    <!-- Estado del Stock -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="layers-outline"></ion-icon>
+          Estado del Stock
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-label class="stat-label">Stock Actual</ion-label>
+                <div class="stat-value">
+                  <ion-badge [color]="stockStatus" class="large-badge">
+                    {{ product.stock }} {{ product.unit }}
+                  </ion-badge>
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-label class="stat-label">Stock Mínimo</ion-label>
+                <div class="stat-value">
+                  {{ product.minStock }} {{ product.unit }}
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <ion-chip [color]="stockStatus">
+                <ion-icon
+                  [name]="stockStatus === 'danger' ? 'warning-outline' :
+                          stockStatus === 'warning' ? 'warning-outline' :
+                          'checkmark-circle-outline'">
+                </ion-icon>
+                <ion-label>{{ stockStatusText }}</ion-label>
+              </ion-chip>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Información de Precios -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="cash-outline"></ion-icon>
+          Precios y Ganancia
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div class="price-item">
+                <ion-label class="price-label">Precio de Compra</ion-label>
+                <div class="price-value purchase">
+                  {{ formatCurrency(product.purchasePrice) }}
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="price-item">
+                <ion-label class="price-label">Precio de Venta</ion-label>
+                <div class="price-value sale">
+                  {{ formatCurrency(product.salePrice) }}
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="6">
+              <div class="price-item">
+                <ion-label class="price-label">Ganancia por Unidad</ion-label>
+                <div class="price-value profit">
+                  {{ formatCurrency(product.profitPerUnit || 0) }}
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="price-item">
+                <ion-label class="price-label">Margen de Ganancia</ion-label>
+                <div class="price-value profit">
+                  {{ profitMargin.toFixed(2) }}%
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- Indicador visual del margen -->
+        <div class="margin-indicator">
+          <div class="margin-bar">
+            <div
+              class="margin-fill"
+              [style.width.%]="profitMargin > 100 ? 100 : profitMargin"
+              [class.high-margin]="profitMargin >= 50"
+              [class.medium-margin]="profitMargin >= 20 && profitMargin < 50"
+              [class.low-margin]="profitMargin < 20">
+            </div>
+          </div>
+          <ion-label class="margin-label">
+            <span *ngIf="profitMargin >= 50">Margen alto</span>
+            <span *ngIf="profitMargin >= 20 && profitMargin < 50">Margen medio</span>
+            <span *ngIf="profitMargin < 20">Margen bajo</span>
+          </ion-label>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Valor Total del Inventario -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="trending-up-outline"></ion-icon>
+          Valor del Inventario
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div class="inventory-item">
+                <ion-label class="inventory-label">Valor en Compra</ion-label>
+                <div class="inventory-value">
+                  {{ formatCurrency(product.purchasePrice * product.stock) }}
+                </div>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="inventory-item">
+                <ion-label class="inventory-label">Valor en Venta</ion-label>
+                <div class="inventory-value highlight">
+                  {{ formatCurrency(product.salePrice * product.stock) }}
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="12">
+              <div class="inventory-item">
+                <ion-label class="inventory-label">Ganancia Potencial</ion-label>
+                <div class="inventory-value profit-highlight">
+                  {{ formatCurrency((product.profitPerUnit || 0) * product.stock) }}
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Información Adicional -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="time-outline"></ion-icon>
+          Información Adicional
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-label>
+            <h3>Fecha de Creación</h3>
+            <p>{{ formatDate(product.createdAt) }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-label>
+            <h3>Última Actualización</h3>
+            <p>{{ formatDate(product.updatedAt) }}</p>
+          </ion-label>
+        </ion-item>
+        <ion-item lines="none" *ngIf="product.id">
+          <ion-label>
+            <h3>ID del Producto</h3>
+            <p>{{ product.id }}</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Botones de Acción -->
+    <div class="action-buttons">
+      <ion-button expand="block" (click)="onEdit()" color="primary">
+        <ion-icon slot="start" name="create-outline"></ion-icon>
+        Editar Producto 
+      </ion-button>
+      <ion-button expand="block" (click)="onDelete()" color="danger" fill="outline">
+        <ion-icon slot="start" name="trash-outline"></ion-icon>
+        Eliminar Producto
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

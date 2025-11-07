@@ -1,4 +1,3 @@
-// src/app/pages/sales/sale-form/sale-form.page.ts
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -44,8 +43,7 @@ import {
   cubeOutline,
   trendingUpOutline,
   checkmarkCircleOutline,
-  searchOutline
-} from 'ionicons/icons';
+  searchOutline, chevronForwardOutline, warningOutline } from 'ionicons/icons';
 import { Product, ProductService } from '../../services/product-service';
 import { CreateSaleRequest, SalesService } from '../../services/sales-service';
 
@@ -104,19 +102,16 @@ export class SaleFormPage implements OnInit {
   searchTerm = '';
   maxDateIso: string = new Date().toISOString();
 
+  // Propiedades adicionales para el template
+  totalAmount: number = 0;
+  estimatedProfit: number = 0;
+  profitMargin: number = 0;
+  remainingStock: number = 0;
+  willBeLowStock: boolean = false;
+  stockStatus: 'danger' | 'warning' | 'success' = 'success';
+
   constructor() {
-    addIcons({
-      saveOutline,
-      calculatorOutline,
-      closeOutline,
-      cartOutline,
-      calendarOutline,
-      cashOutline,
-      cubeOutline,
-      trendingUpOutline,
-      checkmarkCircleOutline,
-      searchOutline
-    });
+    addIcons({cartOutline,closeOutline,cubeOutline,cashOutline,calculatorOutline,calendarOutline,chevronForwardOutline,warningOutline,checkmarkCircleOutline,saveOutline,trendingUpOutline,searchOutline});
 
     this.saleForm = this.createForm();
     this.setupFormListeners();
@@ -145,6 +140,12 @@ export class SaleFormPage implements OnInit {
     // Cuando cambia la cantidad, validar stock
     this.saleForm.get('quantity')?.valueChanges.subscribe(() => {
       this.validateStock();
+      this.calculateValues();
+    });
+
+    // Cuando cambia el precio
+    this.saleForm.get('unitPrice')?.valueChanges.subscribe(() => {
+      this.calculateValues();
     });
   }
 
@@ -165,7 +166,22 @@ export class SaleFormPage implements OnInit {
     });
   }
 
-  onProductChange(productId: number) {
+  // Métodos nuevos para el template
+  onQuantityChange() {
+    this.validateStock();
+    this.calculateValues();
+  }
+
+  onPriceChange() {
+    this.calculateValues();
+  }
+
+  onProductSelection() {
+    const productId = this.saleForm.get('productId')?.value;
+    this.onProductChange(productId);
+  }
+
+  private onProductChange(productId: number) {
     this.selectedProduct = this.products.find(p => p.id === productId);
 
     if (this.selectedProduct) {
@@ -174,12 +190,21 @@ export class SaleFormPage implements OnInit {
         unitPrice: this.selectedProduct.salePrice
       }, { emitEvent: false });
 
-      // Validar stock
+      // Validar stock y calcular valores
       this.validateStock();
+      this.calculateValues();
+    } else {
+      // Resetear valores si no hay producto seleccionado
+      this.totalAmount = 0;
+      this.estimatedProfit = 0;
+      this.profitMargin = 0;
+      this.remainingStock = 0;
+      this.willBeLowStock = false;
+      this.stockStatus = 'success';
     }
   }
 
-  validateStock() {
+  private validateStock() {
     const quantity = this.saleForm.get('quantity')?.value || 0;
 
     if (this.selectedProduct && quantity > this.selectedProduct.stock) {
@@ -187,6 +212,64 @@ export class SaleFormPage implements OnInit {
         stockInsufficient: true,
         availableStock: this.selectedProduct.stock
       });
+    }
+  }
+
+  private calculateValues() {
+    this.calculateTotal();
+    this.calculateProfit();
+    this.calculateStockStatus();
+  }
+
+  private calculateTotal() {
+    const quantity = this.saleForm.get('quantity')?.value || 0;
+    const unitPrice = this.saleForm.get('unitPrice')?.value || 0;
+    this.totalAmount = quantity * unitPrice;
+  }
+
+  private calculateProfit() {
+    if (!this.selectedProduct) {
+      this.estimatedProfit = 0;
+      this.profitMargin = 0;
+      return;
+    }
+
+    const quantity = this.saleForm.get('quantity')?.value || 0;
+    const unitPrice = this.saleForm.get('unitPrice')?.value || 0;
+    const cost = this.selectedProduct.purchasePrice * quantity;
+
+    this.estimatedProfit = (unitPrice * quantity) - cost;
+
+    // Calcular margen de ganancia
+    if (cost > 0) {
+      this.profitMargin = (this.estimatedProfit / cost) * 100;
+    } else if (unitPrice > 0) {
+      this.profitMargin = 100; // Si no hay costo, toda la venta es ganancia
+    } else {
+      this.profitMargin = 0;
+    }
+  }
+
+  private calculateStockStatus() {
+    if (!this.selectedProduct) {
+      this.remainingStock = 0;
+      this.willBeLowStock = false;
+      this.stockStatus = 'success';
+      return;
+    }
+
+    const quantity = this.saleForm.get('quantity')?.value || 0;
+    this.remainingStock = this.selectedProduct.stock - quantity;
+
+    this.willBeLowStock = this.remainingStock <= this.selectedProduct.minStock && this.remainingStock > 0;
+
+    // Determinar el color del badge de stock
+    if (this.remainingStock <= 0) {
+      this.stockStatus = 'danger';
+    } else if (this.willBeLowStock) {
+      this.stockStatus = 'warning';
+    } else {
+      this.stockStatus = 'success';
     }
   }
 
@@ -203,47 +286,29 @@ export class SaleFormPage implements OnInit {
     }
   }
 
-  get totalAmount(): number {
-    const quantity = this.saleForm.get('quantity')?.value || 0;
-    const unitPrice = this.saleForm.get('unitPrice')?.value || 0;
-    return this.salesService.calculateTotal(quantity, unitPrice);
+  // Getters actualizados para mantener compatibilidad
+  get totalAmountGetter(): number {
+    return this.totalAmount;
   }
 
-  get estimatedProfit(): number {
-    if (!this.selectedProduct) return 0;
-
-    const quantity = this.saleForm.get('quantity')?.value || 0;
-    const unitPrice = this.saleForm.get('unitPrice')?.value || 0;
-    const profitPerUnit = unitPrice - this.selectedProduct.purchasePrice;
-
-    return profitPerUnit * quantity;
+  get estimatedProfitGetter(): number {
+    return this.estimatedProfit;
   }
 
-  get profitMargin(): number {
-    if (!this.selectedProduct) return 0;
-
-    const unitPrice = this.saleForm.get('unitPrice')?.value || 0;
-    const purchasePrice = this.selectedProduct.purchasePrice;
-
-    if (purchasePrice === 0) return 0;
-    return ((unitPrice - purchasePrice) / purchasePrice) * 100;
+  get profitMarginGetter(): number {
+    return this.profitMargin;
   }
 
-  get remainingStock(): number {
-    if (!this.selectedProduct) return 0;
-    const quantity = this.saleForm.get('quantity')?.value || 0;
-    return this.selectedProduct.stock - quantity;
+  get remainingStockGetter(): number {
+    return this.remainingStock;
   }
 
-  get willBeLowStock(): boolean {
-    if (!this.selectedProduct) return false;
-    return this.remainingStock <= this.selectedProduct.minStock && this.remainingStock > 0;
+  get willBeLowStockGetter(): boolean {
+    return this.willBeLowStock;
   }
 
-  get stockStatus(): 'danger' | 'warning' | 'success' {
-    if (this.remainingStock === 0) return 'danger';
-    if (this.willBeLowStock) return 'warning';
-    return 'success';
+  get stockStatusGetter(): 'danger' | 'warning' | 'success' {
+    return this.stockStatus;
   }
 
   formatDate(isoDate: string): string {

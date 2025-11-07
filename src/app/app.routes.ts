@@ -25,7 +25,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/products/products.page').then( m => m.ProductsPage)
   },// RUTAS DE PRODUCTOS
   {
-    path: 'products', 
+    path: 'products',
     children: [
       {
         path: '',
@@ -38,11 +38,11 @@ export const routes: Routes = [
       /* {
         path: 'edit/:id',
         loadComponent: () => import('./pages/products/product-form/product-form.page').then(m => m.ProductFormPage)
-      },
+      },*/
       {
         path: ':id',
-        loadComponent: () => import('./pages/products/product-detail/product-detail.page').then(m => m.ProductDetailPage)
-      } */
+        loadComponent: () => import('./pages/product-detail/product-detail.page').then(m => m.ProductDetailPage)
+      }
     ]
   },
   {
