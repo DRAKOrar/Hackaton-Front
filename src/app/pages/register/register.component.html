@@ -1,0 +1,124 @@
+<!-- src/app/pages/register/register.page.html -->
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Registro</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <ion-list>
+      <!-- Username -->
+      <ion-item>
+        <ion-label position="stacked">Username *</ion-label>
+        <ion-input
+          formControlName="username"
+          type="text"
+          placeholder="Ingresa tu username">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" color="danger">
+        <div *ngIf="registerForm.get('username')?.errors?.['required']">El username es requerido</div>
+        <div *ngIf="registerForm.get('username')?.errors?.['minlength']">Mínimo 3 caracteres</div>
+        <div *ngIf="registerForm.get('username')?.errors?.['maxlength']">Máximo 50 caracteres</div>
+      </ion-note>
+
+      <!-- Email -->
+      <ion-item>
+        <ion-label position="stacked">Email *</ion-label>
+        <ion-input
+          formControlName="email"
+          type="email"
+          placeholder="Ingresa tu email">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" color="danger">
+        <div *ngIf="registerForm.get('email')?.errors?.['required']">El email es requerido</div>
+        <div *ngIf="registerForm.get('email')?.errors?.['email']">Email no válido</div>
+      </ion-note>
+
+      <!-- Password -->
+      <ion-item>
+        <ion-label position="stacked">Contraseña *</ion-label>
+        <ion-input
+          formControlName="password"
+          type="password"
+          placeholder="Ingresa tu contraseña">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" color="danger">
+        <div *ngIf="registerForm.get('password')?.errors?.['required']">La contraseña es requerida</div>
+        <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Mínimo 6 caracteres</div>
+      </ion-note>
+
+      <!-- Nombre -->
+      <ion-item>
+        <ion-label position="stacked">Nombre *</ion-label>
+        <ion-input
+          formControlName="firstName"
+          type="text"
+          placeholder="Ingresa tu nombre">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" color="danger">
+        El nombre es requerido
+      </ion-note>
+
+      <!-- Apellido -->
+      <ion-item>
+        <ion-label position="stacked">Apellido *</ion-label>
+        <ion-input
+          formControlName="lastName"
+          type="text"
+          placeholder="Ingresa tu apellido">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" color="danger">
+        El apellido es requerido
+      </ion-note>
+
+      <!-- Documento de Identidad -->
+      <ion-item>
+        <ion-label position="stacked">Documento de Identidad *</ion-label>
+        <ion-input
+          formControlName="identityDocument"
+          type="text"
+          placeholder="Ingresa tu documento">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('identityDocument')?.invalid && registerForm.get('identityDocument')?.touched" color="danger">
+        El documento de identidad es requerido
+      </ion-note>
+
+      <!-- Fecha de Nacimiento -->
+      <ion-item>
+        <ion-label position="stacked">Fecha de Nacimiento *</ion-label>
+        <ion-input
+          formControlName="dateOfBirth"
+          type="date"
+          placeholder="Selecciona tu fecha de nacimiento">
+        </ion-input>
+      </ion-item>
+      <ion-note *ngIf="registerForm.get('dateOfBirth')?.invalid && registerForm.get('dateOfBirth')?.touched" color="danger">
+        La fecha de nacimiento es requerida
+      </ion-note>
+    </ion-list>
+
+    <ion-button
+      type="submit"
+      expand="block"
+      [disabled]="registerForm.invalid || isLoading"
+      class="ion-margin">
+      <ion-spinner *ngIf="isLoading"></ion-spinner>
+      <span *ngIf="!isLoading">Registrarse</span>
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      fill="clear"
+      routerLink="/login"
+      routerDirection="root">
+      ¿Ya tienes cuenta? Inicia sesión
+    </ion-button>
+  </form>
+</ion-content>
