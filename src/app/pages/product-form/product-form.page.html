@@ -1,40 +1,99 @@
-<!-- src/app/pages/products/product-form/product-form.page.html -->
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+<ion-header [translucent]="true" class="custom-header">
+  <ion-toolbar class="brand-toolbar primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/products"></ion-back-button>
+  <ion-menu-button></ion-menu-button>
+</ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/products" class="custom-back-btn"></ion-back-button>
     </ion-buttons>
-    <ion-title>
+    <ion-title class="page-title">
       {{ isEditMode ? 'Editar Producto' : 'Nuevo Producto' }}
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="onCancel()" [disabled]="isSaving">
+      <ion-button (click)="onCancel()" [disabled]="isSaving" class="close-btn" fill="clear">
         <ion-icon name="close-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" class="custom-content">
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Cargando producto...</p>
+  <div *ngIf="isLoading" class="loading-container animated-fade-in">
+    <div class="loading-content">
+      <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+      <p class="loading-text">Cargando producto...</p>
+    </div>
   </div>
 
   <!-- Formulario -->
-  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+  <form [formGroup]="productForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="product-form animated-fade-in">
+
+    <!-- Imagen del Producto -->
+    <ion-card class="form-section-card image-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="image-outline" class="section-icon"></ion-icon>
+            Imagen del Producto
+          </div>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="card-content">
+        <div class="img-uploader">
+          <div class="preview-container" *ngIf="imagePreview; else noImage">
+            <div class="preview-wrapper">
+              <ion-img [src]="imagePreview" class="image-preview" (ionImgWillLoad)="onImageLoad()" (ionError)="onImageError()"></ion-img>
+              <div class="preview-overlay">
+                <ion-button color="danger" fill="clear" size="small" (click)="clearImage()" class="remove-btn">
+                  <ion-icon name="trash-outline" slot="start"></ion-icon>
+                  Quitar imagen
+                </ion-button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noImage>
+            <div class="no-image-placeholder">
+              <ion-icon name="image-outline" class="placeholder-icon"></ion-icon>
+              <ion-note class="placeholder-text">Sin imagen seleccionada</ion-note>
+            </div>
+          </ng-template>
+
+          <div class="uploader-actions">
+            <ion-button (click)="takePhoto()" expand="block" class="upload-btn camera-btn">
+              <ion-icon name="camera-outline" slot="start" class="btn-icon"></ion-icon>
+              Tomar foto
+            </ion-button>
+
+            <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)">
+            <ion-button color="medium" fill="outline" expand="block" (click)="triggerFile(fileInput)" class="upload-btn gallery-btn">
+              <ion-icon name="image-outline" slot="start" class="btn-icon"></ion-icon>
+              Subir desde galería
+            </ion-button>
+          </div>
+
+          <ion-note class="helper-text">
+            Se enviará al backend como base64 (sin prefijo <code>data:</code>).
+          </ion-note>
+        </div>
+      </ion-card-content>
+    </ion-card>
 
     <!-- Información Básica -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Información Básica</ion-card-title>
+    <ion-card class="form-section-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="cube-outline" class="section-icon"></ion-icon>
+            Información Básica
+          </div>
+        </ion-card-title>
       </ion-card-header>
-      <ion-card-content>
-        <ion-list lines="full">
+      <ion-card-content class="card-content">
+        <ion-list lines="full" class="custom-list">
           <!-- Nombre -->
-          <ion-item [class.ion-invalid]="isFieldInvalid('name')">
-            <ion-label position="stacked">
+          <ion-item [class.invalid-field]="isFieldInvalid('name')" class="input-item">
+            <ion-label position="stacked" class="input-label">
               Nombre del Producto *
             </ion-label>
             <ion-input
@@ -42,15 +101,16 @@
               type="text"
               placeholder="Ej: Laptop Dell Inspiron"
               [clearInput]="true"
+              class="custom-input"
             ></ion-input>
-            <ion-note slot="error" *ngIf="isFieldInvalid('name')">
+            <ion-note slot="error" *ngIf="isFieldInvalid('name')" class="error-message">
               {{ getErrorMessage('name') }}
             </ion-note>
           </ion-item>
 
           <!-- Descripción -->
-          <ion-item>
-            <ion-label position="stacked">
+          <ion-item class="textarea-item">
+            <ion-label position="stacked" class="input-label">
               Descripción
             </ion-label>
             <ion-textarea
@@ -59,20 +119,24 @@
               rows="3"
               [counter]="true"
               maxlength="500"
+              class="custom-textarea"
             ></ion-textarea>
+            <div class="char-counter" *ngIf="productForm.get('description')?.value">
+              {{ productForm.get('description')?.value?.length || 0 }}/500
+            </div>
           </ion-item>
 
           <!-- Unidad de Medida -->
-          <ion-item [class.ion-invalid]="isFieldInvalid('unit')">
-            <ion-label position="stacked">
+          <ion-item [class.invalid-field]="isFieldInvalid('unit')" class="select-item">
+            <ion-label position="stacked" class="input-label">
               Unidad de Medida *
             </ion-label>
-            <ion-select formControlName="unit" interface="action-sheet">
-              <ion-select-option *ngFor="let unit of units" [value]="unit">
+            <ion-select formControlName="unit" interface="action-sheet" class="custom-select">
+              <ion-select-option *ngFor="let unit of units" [value]="unit" class="unit-option">
                 {{ unit }}
               </ion-select-option>
             </ion-select>
-            <ion-note slot="error" *ngIf="isFieldInvalid('unit')">
+            <ion-note slot="error" *ngIf="isFieldInvalid('unit')" class="error-message">
               {{ getErrorMessage('unit') }}
             </ion-note>
           </ion-item>
@@ -81,42 +145,46 @@
     </ion-card>
 
     <!-- Precios -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>
-          <ion-icon name="calculator-outline"></ion-icon>
-          Precios
+    <ion-card class="form-section-card prices-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="calculator-outline" class="section-icon"></ion-icon>
+            Precios
+          </div>
         </ion-card-title>
       </ion-card-header>
-      <ion-card-content>
-        <ion-list lines="full">
-          <ion-grid>
+      <ion-card-content class="card-content">
+        <ion-list lines="full" class="custom-list">
+          <ion-grid class="prices-grid">
             <ion-row>
               <!-- Precio de Compra -->
               <ion-col size="12" sizeMd="6">
-                <ion-item [class.ion-invalid]="isFieldInvalid('purchasePrice')">
-                  <ion-label position="stacked">
+                <ion-item [class.invalid-field]="isFieldInvalid('costPrice')" class="input-item price-item">
+                  <ion-label position="stacked" class="input-label">
                     Precio de Compra *
                   </ion-label>
                   <ion-input
-                    formControlName="purchasePrice"
+                    formControlName="costPrice"
                     type="number"
                     placeholder="0.00"
                     min="0"
                     step="0.01"
+                    class="custom-input price-input"
+                    (ionInput)="onPriceChange()"
                   >
-                    <div slot="start">$</div>
+                    <div slot="start" class="currency-symbol">$</div>
                   </ion-input>
-                  <ion-note slot="error" *ngIf="isFieldInvalid('purchasePrice')">
-                    {{ getErrorMessage('purchasePrice') }}
+                  <ion-note slot="error" *ngIf="isFieldInvalid('costPrice')" class="error-message">
+                    {{ getErrorMessage('costPrice') }}
                   </ion-note>
                 </ion-item>
               </ion-col>
 
               <!-- Precio de Venta -->
               <ion-col size="12" sizeMd="6">
-                <ion-item [class.ion-invalid]="isFieldInvalid('salePrice')">
-                  <ion-label position="stacked">
+                <ion-item [class.invalid-field]="isFieldInvalid('salePrice')" class="input-item price-item">
+                  <ion-label position="stacked" class="input-label">
                     Precio de Venta *
                   </ion-label>
                   <ion-input
@@ -125,10 +193,12 @@
                     placeholder="0.00"
                     min="0"
                     step="0.01"
+                    class="custom-input price-input"
+                    (ionInput)="onPriceChange()"
                   >
-                    <div slot="start">$</div>
+                    <div slot="start" class="currency-symbol">$</div>
                   </ion-input>
-                  <ion-note slot="error" *ngIf="isFieldInvalid('salePrice')">
+                  <ion-note slot="error" *ngIf="isFieldInvalid('salePrice')" class="error-message">
                     {{ getErrorMessage('salePrice') }}
                   </ion-note>
                 </ion-item>
@@ -138,14 +208,14 @@
         </ion-list>
 
         <!-- Indicadores de Ganancia -->
-        <div class="profit-indicators" *ngIf="productForm.get('purchasePrice')?.value > 0 || productForm.get('salePrice')?.value > 0">
-          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'">
-            <ion-icon name="trending-up-outline"></ion-icon>
+        <div class="profit-indicators animated-fade-in" *ngIf="showProfitIndicators">
+          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'" class="profit-chip">
+            <ion-icon name="trending-up-outline" class="chip-icon"></ion-icon>
             <ion-label>
               Ganancia por unidad: ${{ profitPerUnit | number:'1.2-2' }}
             </ion-label>
           </ion-chip>
-          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'" outline>
+          <ion-chip [color]="isProfitPositive ? 'success' : 'danger'" outline class="profit-chip">
             <ion-label>
               Margen: {{ profitMargin | number:'1.1-1' }}%
             </ion-label>
@@ -155,18 +225,23 @@
     </ion-card>
 
     <!-- Inventario -->
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Inventario</ion-card-title>
+    <ion-card class="form-section-card inventory-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="business-outline" class="section-icon"></ion-icon>
+            Inventario
+          </div>
+        </ion-card-title>
       </ion-card-header>
-      <ion-card-content>
-        <ion-list lines="full">
-          <ion-grid>
+      <ion-card-content class="card-content">
+        <ion-list lines="full" class="custom-list">
+          <ion-grid class="inventory-grid">
             <ion-row>
               <!-- Stock Actual -->
               <ion-col size="12" sizeMd="6">
-                <ion-item [class.ion-invalid]="isFieldInvalid('stock')">
-                  <ion-label position="stacked">
+                <ion-item [class.invalid-field]="isFieldInvalid('stock')" class="input-item stock-item">
+                  <ion-label position="stacked" class="input-label">
                     Stock Actual *
                   </ion-label>
                   <ion-input
@@ -174,11 +249,13 @@
                     type="number"
                     placeholder="0"
                     min="0"
+                    class="custom-input"
+                    (ionInput)="onStockChange()"
                   ></ion-input>
-                  <ion-note slot="error" *ngIf="isFieldInvalid('stock')">
+                  <ion-note slot="error" *ngIf="isFieldInvalid('stock')" class="error-message">
                     {{ getErrorMessage('stock') }}
                   </ion-note>
-                  <ion-note slot="helper">
+                  <ion-note slot="helper" class="helper-text">
                     Cantidad actual disponible
                   </ion-note>
                 </ion-item>
@@ -186,8 +263,8 @@
 
               <!-- Stock Mínimo -->
               <ion-col size="12" sizeMd="6">
-                <ion-item [class.ion-invalid]="isFieldInvalid('minStock')">
-                  <ion-label position="stacked">
+                <ion-item [class.invalid-field]="isFieldInvalid('minStock')" class="input-item stock-item">
+                  <ion-label position="stacked" class="input-label">
                     Stock Mínimo *
                   </ion-label>
                   <ion-input
@@ -195,11 +272,13 @@
                     type="number"
                     placeholder="0"
                     min="0"
+                    class="custom-input"
+                    (ionInput)="onStockChange()"
                   ></ion-input>
-                  <ion-note slot="error" *ngIf="isFieldInvalid('minStock')">
+                  <ion-note slot="error" *ngIf="isFieldInvalid('minStock')" class="error-message">
                     {{ getErrorMessage('minStock') }}
                   </ion-note>
-                  <ion-note slot="helper">
+                  <ion-note slot="helper" class="helper-text">
                     Alerta cuando llegue a este nivel
                   </ion-note>
                 </ion-item>
@@ -208,16 +287,30 @@
           </ion-grid>
 
           <!-- Estado Activo/Inactivo (Solo en modo edición) -->
-          <ion-item *ngIf="isEditMode">
-            <ion-label>
+          <ion-item *ngIf="isEditMode" class="status-item">
+            <ion-label class="status-label">
               <h2>Estado del Producto</h2>
               <p>Los productos inactivos no aparecen en las ventas</p>
             </ion-label>
-            <ion-chip [color]="productForm.get('active')?.value ? 'success' : 'medium'" slot="end">
+            <ion-toggle
+              formControlName="active"
+              slot="end"
+              class="status-toggle"
+              color="success"
+            ></ion-toggle>
+            <ion-chip [color]="productForm.get('active')?.value ? 'success' : 'medium'" class="status-chip">
               <ion-icon [name]="productForm.get('active')?.value ? 'checkmark-outline' : 'close-outline'"></ion-icon>
               <ion-label>{{ productForm.get('active')?.value ? 'Activo' : 'Inactivo' }}</ion-label>
             </ion-chip>
           </ion-item>
+
+          <!-- Alerta de stock bajo -->
+          <div *ngIf="showLowStockWarning" class="stock-warning animated-pulse">
+            <ion-chip color="warning" class="warning-chip">
+              <ion-icon name="warning-outline" class="warning-icon"></ion-icon>
+              <ion-label>¡Atención! El stock actual está cerca del mínimo</ion-label>
+            </ion-chip>
+          </div>
         </ion-list>
       </ion-card-content>
     </ion-card>
@@ -230,6 +323,7 @@
         fill="outline"
         (click)="onCancel()"
         [disabled]="isSaving"
+        class="cancel-btn"
       >
         <ion-icon name="close-outline" slot="start"></ion-icon>
         Cancelar
@@ -239,9 +333,11 @@
         expand="block"
         type="submit"
         [disabled]="productForm.invalid || isSaving"
+        class="submit-btn"
+        [color]="isEditMode ? 'primary' : 'success'"
       >
-        <ion-spinner *ngIf="isSaving" name="crescent" slot="start"></ion-spinner>
-        <ion-icon *ngIf="!isSaving" name="save-outline" slot="start"></ion-icon>
+        <ion-spinner *ngIf="isSaving" name="crescent" slot="start" class="submit-spinner"></ion-spinner>
+        <ion-icon *ngIf="!isSaving" name="save-outline" slot="start" class="submit-icon"></ion-icon>
         {{ isSaving ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear Producto') }}
       </ion-button>
     </div>

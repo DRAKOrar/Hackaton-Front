@@ -1,3 +1,206 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-menu contentId="main-content" type="overlay" class="custom-menu">
+    <ion-header class="menu-header-bar">
+      <ion-toolbar class="brand-toolbar">
+        <ion-title class="menu-title">Navegación</ion-title>
+        <ion-buttons slot="end">
+          <ion-button fill="clear" (click)="cerrarMenu()" class="close-menu-btn">
+            <ion-icon name="close-outline" class="close-icon"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="menu-content">
+      <!-- Header del menú -->
+      <div class="menu-header">
+        <div class="app-logo">
+          <div class="logo-icon-container">
+            <div class="logo-icon">
+              <ion-icon name="cash-outline" class="logo-main-icon"></ion-icon>
+            </div>
+            <div class="logo-pulse"></div>
+          </div>
+          <div class="app-info">
+            <h2 class="app-name">Fiados App</h2>
+            <p class="app-subtitle">Gestión de deudas</p>
+          </div>
+        </div>
+        <div class="user-status" *ngIf="currentUser; else noUser">
+          <div class="user-avatar">
+            <div class="avatar-fallback user">
+              {{ getInitial(getUserDisplayName()) }}
+            </div>
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ getUserDisplayName() }}</span>
+            <span class="user-email">{{ currentUser.email }}</span>
+          </div>
+        </div>
+        <ng-template #noUser>
+          <div class="user-status guest">
+            <div class="user-avatar">
+              <div class="avatar-fallback guest">
+                <ion-icon name="person-outline"></ion-icon>
+              </div>
+            </div>
+            <div class="user-info">
+              <span class="user-name">Invitado</span>
+              <span class="user-email">No autenticado</span>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <ion-list class="menu-list">
+        <ion-menu-toggle auto-hide="false">
+
+          <!-- Inicio -->
+          <ion-item
+            routerLink="/inicio"
+            routerLinkActive="selected"
+            [routerLinkActiveOptions]="{ exact: true }"
+            detail="false"
+            class="menu-item"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container dashboard" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="home-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Inicio</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Productos (lista) -->
+          <ion-item
+            routerLink="/products"
+            routerLinkActive="selected"
+            [routerLinkActiveOptions]="{ exact: true }"
+            detail="false"
+            class="menu-item"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container products" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="cube-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Productos</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Nuevo producto -->
+          <ion-item
+            routerLink="/products/new"
+            routerLinkActive="selected"
+            detail="false"
+            class="menu-item"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container new-product" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="add-circle-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Nuevo producto</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Registrar venta -->
+          <ion-item
+            routerLink="/sale-form"
+            routerLinkActive="selected"
+            detail="false"
+            class="menu-item"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container sales" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="cart-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Registrar venta</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Separador para sección de autenticación -->
+          <div class="menu-divider" *ngIf="!currentUser">
+            <span class="divider-text">Autenticación</span>
+          </div>
+
+          <!-- Login -->
+          <ion-item
+            routerLink="/login"
+            routerLinkActive="selected"
+            detail="false"
+            class="menu-item"
+            *ngIf="!currentUser"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container login" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="log-in-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Iniciar sesión</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Register -->
+          <ion-item
+            routerLink="/register"
+            routerLinkActive="selected"
+            detail="false"
+            class="menu-item"
+            *ngIf="!currentUser"
+            (click)="cerrarMenu()">
+            <div class="menu-icon-container register" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="person-add-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Crear cuenta</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+          <!-- Cerrar sesión (solo si está autenticado) -->
+          <ion-item
+            *ngIf="currentUser"
+            detail="false"
+            class="menu-item logout-item"
+            (click)="onLogout()">
+            <div class="menu-icon-container logout" slot="start">
+              <div class="menu-icon-background"></div>
+              <ion-icon name="log-out-outline" class="menu-icon"></ion-icon>
+            </div>
+            <ion-label class="menu-label">Cerrar sesión</ion-label>
+            <div class="menu-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </ion-item>
+
+        </ion-menu-toggle>
+      </ion-list>
+
+      <!-- Footer del menú -->
+      <div class="menu-footer">
+        <div class="app-version">
+          <div class="version-icon">
+            <ion-icon name="cube-outline"></ion-icon>
+          </div>
+          <span class="version-text">v1.0.0</span>
+        </div>
+        <p class="footer-text">© 2025 Fiados App</p>
+        <div class="status-indicator">
+          <div class="status-dot online"></div>
+          <span class="status-text">En línea</span>
+        </div>
+      </div>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

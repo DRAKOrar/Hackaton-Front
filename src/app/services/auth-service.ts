@@ -125,7 +125,7 @@ export class AuthService {
 
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convertir a milisegundos
+      const exp = payload.exp * 1000; // Convertir a milisegundozzzzzzs
       return Date.now() > exp;
     } catch {
       return true;

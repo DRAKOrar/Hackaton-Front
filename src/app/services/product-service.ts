@@ -9,11 +9,12 @@ export interface Product {
   userId?: number;
   name: string;
   description?: string;
-  purchasePrice: number;
+  costPrice: number;
   salePrice: number;
   stock: number;
   minStock: number;
   unit: string;
+  image?: string;           // <<--- NUEVO
   createdAt?: string;
   updatedAt?: string;
   active?: boolean;
@@ -23,23 +24,26 @@ export interface Product {
 export interface CreateProductRequest {
   name: string;
   description?: string;
-  purchasePrice: number;
+  costPrice: number;
   salePrice: number;
   stock: number;
   minStock: number;
   unit: string;
+  image?: string;           // <<--- NUEVO (opcional)
 }
 
 export interface UpdateProductRequest {
   name?: string;
   description?: string;
-  purchasePrice?: number;
+  costPrice?: number;
   salePrice?: number;
   stock?: number;
   minStock?: number;
   unit?: string;
   active?: boolean;
+  image?: string;           // <<--- NUEVO (opcional)
 }
+
 
 @Injectable({
   providedIn: 'root'
@@ -78,6 +82,13 @@ export class ProductService {
     return this.http.put<Product>(`${this.apiUrl}/${id}`, product);
   }
 
+  // src/app/services/product-service.ts (agrega este método)
+  updateStatus(id: number, active: boolean) {
+    const params = new HttpParams().set('active', String(active));
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, null, { params });
+  }
+
+
   /**
    * Eliminar (desactivar) un producto
    */
@@ -96,7 +107,7 @@ export class ProductService {
    * Calcular el margen de ganancia porcentual
    */
   calculateProfitMargin(product: Product): number {
-    if (product.purchasePrice === 0) return 0;
-    return ((product.salePrice - product.purchasePrice) / product.purchasePrice) * 100;
+    if (product.costPrice === 0) return 0;
+    return ((product.salePrice - product.costPrice) / product.costPrice) * 100;
   }
 }

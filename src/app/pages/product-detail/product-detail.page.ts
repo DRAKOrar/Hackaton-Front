@@ -1,30 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButtons,
-  IonButton,
-  IonBackButton,
-  IonIcon,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonItem,
-  IonLabel,
-  IonBadge,
-  IonSpinner,
-  IonChip,
-  IonGrid,
-  IonRow,
-  IonCol,
-  AlertController,
-  ToastController
-} from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonBackButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonBadge, IonSpinner, IonChip, IonGrid, IonRow, IonCol, AlertController, ToastController, IonAvatar, IonList, IonMenuButton } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   cubeOutline,
@@ -36,8 +13,7 @@ import {
   createOutline,
   trashOutline,
   timeOutline,
-  pricetagOutline
-} from 'ionicons/icons';
+  pricetagOutline, alertCircleOutline, arrowDownCircleOutline, arrowUpCircleOutline, pulseOutline, bagOutline, cartOutline, rocketOutline, informationCircleOutline, calendarOutline, refreshOutline, fingerPrintOutline } from 'ionicons/icons';
 import { Product, ProductService } from '../../services/product-service';
 
 @Component({
@@ -45,7 +21,7 @@ import { Product, ProductService } from '../../services/product-service';
   templateUrl: './product-detail.page.html',
   styleUrls: ['./product-detail.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonList, IonAvatar,
     CommonModule,
     IonHeader,
     IonToolbar,
@@ -66,8 +42,7 @@ import { Product, ProductService } from '../../services/product-service';
     IonChip,
     IonGrid,
     IonRow,
-    IonCol
-  ]
+    IonCol, IonMenuButton]
 })
 export class ProductDetailPage implements OnInit {
   private route = inject(ActivatedRoute);
@@ -86,18 +61,7 @@ export class ProductDetailPage implements OnInit {
   stockStatusText = '';
 
   constructor() {
-    addIcons({
-      cubeOutline,
-      cashOutline,
-      trendingUpOutline,
-      layersOutline,
-      warningOutline,
-      checkmarkCircleOutline,
-      createOutline,
-      trashOutline,
-      timeOutline,
-      pricetagOutline
-    });
+    addIcons({createOutline,trashOutline,cubeOutline,layersOutline,alertCircleOutline,checkmarkCircleOutline,cashOutline,arrowDownCircleOutline,arrowUpCircleOutline,trendingUpOutline,pulseOutline,bagOutline,cartOutline,rocketOutline,informationCircleOutline,calendarOutline,refreshOutline,fingerPrintOutline,warningOutline,timeOutline,pricetagOutline});
   }
 
   ngOnInit() {
@@ -184,6 +148,35 @@ export class ProductDetailPage implements OnInit {
     });
   }
 
+  // ...
+getImageSrc(): string | null {
+  if (!this.product?.image) return null;
+  // Si no conoces el mime exacto, usa image/* para que el navegador lo muestre igual.
+  return `data:image/*;base64,${this.product.image}`;
+}
+
+getAvatarColor(): string {
+  const colors = ['primary', 'secondary', 'success', 'warning'];
+  const index = (this.product?.name?.length || 0) % colors.length;
+  return colors[index];
+}
+
+getMarginPercentage(): number {
+  if (this.profitMargin < 0) return 0;
+  return this.profitMargin > 100 ? 100 : this.profitMargin;
+}
+
+// ...
+onImageLoad() {
+  console.log('Imagen cargada correctamente');
+}
+
+onImageError() {
+  console.error('Error al cargar la imagen');
+  // Puedes mostrar un toast o manejar el error
+}
+
+
   formatDate(dateString?: string): string {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -211,4 +204,6 @@ export class ProductDetailPage implements OnInit {
     });
     await toast.present();
   }
+
+
 }

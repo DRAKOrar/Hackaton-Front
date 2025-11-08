@@ -2,38 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonSearchbar,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonBadge,
-  IonFab,
-  IonFabButton,
-  IonRefresher,
-  IonRefresherContent,
-  IonSegment,
-  IonSegmentButton,
-  IonChip,
-  IonSkeletonText,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonItemSliding,
-  IonItemOptions,
-  IonItemOption,
-  AlertController,
-  ToastController,
-  IonNote
-} from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonLabel, IonBadge, IonFab, IonFabButton, IonRefresher, IonRefresherContent, IonSegment, IonSegmentButton, IonChip, IonSkeletonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItemSliding, IonItemOptions, IonItemOption, AlertController, ToastController, IonNote, IonMenuButton } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   addOutline,
@@ -85,8 +54,9 @@ import { Product, ProductService } from '../../services/product-service';
     IonItemSliding,
     IonItemOptions,
     IonItemOption,
-    IonNote
-  ]
+    IonNote,
+    IonMenuButton
+]
 })
 export class ProductsPage implements OnInit {
   private productService = inject(ProductService);
