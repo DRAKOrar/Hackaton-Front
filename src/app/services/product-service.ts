@@ -1,7 +1,7 @@
 // src/app/services/product.service.ts
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, switchMap } from 'rxjs';
 import { environment } from 'src/environment/environment';
 
 export interface Product {
@@ -14,7 +14,8 @@ export interface Product {
   stock: number;
   minStock: number;
   unit: string;
-  image?: string;           // <<--- NUEVO
+  image?: string;
+  publication?: string | null;
   createdAt?: string;
   updatedAt?: string;
   active?: boolean;
@@ -29,7 +30,8 @@ export interface CreateProductRequest {
   stock: number;
   minStock: number;
   unit: string;
-  image?: string;           // <<--- NUEVO (opcional)
+  image?: string;
+  publication?: string | null;
 }
 
 export interface UpdateProductRequest {
@@ -41,71 +43,109 @@ export interface UpdateProductRequest {
   minStock?: number;
   unit?: string;
   active?: boolean;
-  image?: string;           // <<--- NUEVO (opcional)
+  image?: string;
+  publication?: string | null;
 }
 
+export interface GeneratePublicacionRequest {
+  productDetails: string;
+  goal: string;
+}
+
+export interface GeneratePublicacionResponse {
+  goal: string;
+  productDetails: string;
+  promotionText: string;
+  promptUsed: string;
+  [k: string]: unknown;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = environment.apiUrl + '/api/products';
+  private baseUrl = environment.apiUrl.replace(/\/api\/.*$/, '');
+  private apiUrl = `${this.baseUrl}/api/products`;
   private http = inject(HttpClient);
 
-  /**
-   * Obtener todos los productos
-   * @param activeOnly - Si es true, solo retorna productos activos
-   */
+  constructor() {
+    console.log('🔧 ProductService inicializado con baseUrl:', this.baseUrl);
+    console.log('🔧 apiUrl:', this.apiUrl);
+  }
+
   getProducts(activeOnly: boolean = true): Observable<Product[]> {
     const params = new HttpParams().set('activeOnly', activeOnly.toString());
     return this.http.get<Product[]>(this.apiUrl, { params });
   }
 
-  /**
-   * Obtener un producto por ID
-   */
   getProductById(id: number): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/${id}`);
   }
 
-  /**
-   * Crear un nuevo producto
-   */
   createProduct(product: CreateProductRequest): Observable<Product> {
     return this.http.post<Product>(this.apiUrl, product);
   }
 
-  /**
-   * Actualizar un producto existente
-   */
   updateProduct(id: number, product: UpdateProductRequest): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${id}`, product);
   }
 
-  // src/app/services/product-service.ts (agrega este método)
-  updateStatus(id: number, active: boolean) {
+  updateStatus(id: number, active: boolean): Observable<void> {
     const params = new HttpParams().set('active', String(active));
     return this.http.patch<void>(`${this.apiUrl}/${id}/status`, null, { params });
   }
 
-
-  /**
-   * Eliminar (desactivar) un producto
-   */
   deleteProduct(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
+  generatePublicacion(productDetails: string, goal: string): Observable<GeneratePublicacionResponse> {
+    const promotionsUrl = `${this.baseUrl}/api/promotions/generate`;
+    console.log('🤖 Generando publicación en:', promotionsUrl);
+    return this.http.post<GeneratePublicacionResponse>(
+      promotionsUrl,
+      { productDetails, goal }
+    );
+  }
+
   /**
-   * Verificar si un producto tiene stock bajo
+   * VERSIÓN PUT: Actualizar publicación haciendo PUT completo
+   * Primero obtiene el producto, luego hace PUT con todos los campos
    */
+  updatePublicacion(productId: number, publication: string): Observable<Product> {
+    console.log('📤 Iniciando actualización de publicación para producto:', productId);
+
+    return this.getProductById(productId).pipe(
+      switchMap(product => {
+        console.log('📦 Producto obtenido:', product);
+
+        // Preparar el objeto completo con todos los campos requeridos
+        const fullProduct: UpdateProductRequest = {
+          name: product.name,
+          description: product.description || '',
+          costPrice: product.costPrice,
+          salePrice: product.salePrice,
+          stock: product.stock,
+          minStock: product.minStock,
+          unit: product.unit,
+          active: product.active ?? true,
+          image: product.image || '',
+          publication: publication.trim()
+        };
+
+        const url = `${this.apiUrl}/${productId}`;
+        console.log('💾 Actualizando producto completo (PUT) en:', url);
+        console.log('📋 Datos completos a enviar:', fullProduct);
+
+        return this.http.put<Product>(url, fullProduct);
+      })
+    );
+  }
+
   isLowStock(product: Product): boolean {
     return product.stock <= product.minStock;
   }
 
-  /**
-   * Calcular el margen de ganancia porcentual
-   */
   calculateProfitMargin(product: Product): number {
     if (product.costPrice === 0) return 0;
     return ((product.salePrice - product.costPrice) / product.costPrice) * 100;

@@ -1,23 +1,56 @@
+// src/app/pages/products/products.page.ts
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonIcon, IonSearchbar, IonList, IonItem, IonLabel, IonBadge, IonFab, IonFabButton, IonRefresher, IonRefresherContent, IonSegment, IonSegmentButton, IonChip, IonSkeletonText, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItemSliding, IonItemOptions, IonItemOption, AlertController, ToastController, IonNote, IonMenuButton } from '@ionic/angular/standalone';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonSearchbar,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+  IonBadge,
+  IonRefresher,
+  IonRefresherContent,
+  IonCard,
+  IonCardContent,
+  IonCardHeader,
+  IonSkeletonText,
+  IonList,
+  IonItemSliding,
+  IonItem,
+  IonIcon,
+  IonChip,
+  IonItemOptions,
+  IonItemOption,
+  IonFab,
+  IonFabButton,
+  IonButtons,
+  IonButton,
+  IonMenuButton,
+  AlertController,
+  ToastController,
+  ModalController
+} from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  addOutline,
-  searchOutline,
-  filterOutline,
   cubeOutline,
-  trendingUpOutline,
+  refreshOutline,
   warningOutline,
+  cashOutline,
+  cartOutline,
+  trendingUpOutline,
+  addOutline,
   createOutline,
   trashOutline,
-  eyeOutline,
-  arrowDownOutline,
-  cashOutline,
-  cartOutline, refreshOutline } from 'ionicons/icons';
+  informationCircleOutline,
+  newspaperOutline
+} from 'ionicons/icons';
 import { Product, ProductService } from '../../services/product-service';
+import { PublicacionModalComponent } from '../../components/publicacion-modal/publicacion-modal.component';
 
 @Component({
   selector: 'app-products',
@@ -31,47 +64,61 @@ import { Product, ProductService } from '../../services/product-service';
     IonToolbar,
     IonTitle,
     IonContent,
-    IonButtons,
-    IonButton,
-    IonIcon,
     IonSearchbar,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonBadge,
-    IonFab,
-    IonFabButton,
-    IonRefresher,
-    IonRefresherContent,
     IonSegment,
     IonSegmentButton,
-    IonChip,
-    IonSkeletonText,
+    IonLabel,
+    IonBadge,
+    IonRefresher,
+    IonRefresherContent,
     IonCard,
-    IonCardHeader,
-    IonCardTitle,
     IonCardContent,
+    IonCardHeader,
+    IonSkeletonText,
+    IonList,
     IonItemSliding,
+    IonItem,
+    IonIcon,
+    IonChip,
     IonItemOptions,
     IonItemOption,
-    IonNote,
+    IonFab,
+    IonFabButton,
+    IonButtons,
+    IonButton,
     IonMenuButton
-]
+  ]
 })
 export class ProductsPage implements OnInit {
   private productService = inject(ProductService);
   private router = inject(Router);
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
+  private modalController = inject(ModalController);
 
   products: Product[] = [];
   filteredProducts: Product[] = [];
-  isLoading = false;
   searchTerm = '';
-  selectedFilter: 'all' | 'active' | 'lowStock' = 'all';
+  selectedFilter = 'all';
+  isLoading = false;
+
+  totalProducts = 0;
+  lowStockCount = 0;
 
   constructor() {
-    addIcons({cubeOutline,refreshOutline,warningOutline,cashOutline,cartOutline,trendingUpOutline,createOutline,trashOutline,addOutline,searchOutline,filterOutline,eyeOutline,arrowDownOutline});
+    addIcons({
+      cubeOutline,
+      refreshOutline,
+      warningOutline,
+      cashOutline,
+      cartOutline,
+      trendingUpOutline,
+      addOutline,
+      createOutline,
+      trashOutline,
+      informationCircleOutline,
+      newspaperOutline
+    });
   }
 
   ngOnInit() {
@@ -85,21 +132,19 @@ export class ProductsPage implements OnInit {
       next: (products) => {
         this.products = products;
         this.applyFilters();
+        this.calculateStats();
         this.isLoading = false;
-
         if (event) {
           event.target.complete();
         }
       },
       error: (error) => {
         console.error('Error cargando productos:', error);
+        this.showToast('Error al cargar productos', 'danger');
         this.isLoading = false;
-
         if (event) {
           event.target.complete();
         }
-
-        this.showToast('Error al cargar productos', 'danger');
       }
     });
   }
@@ -114,28 +159,31 @@ export class ProductsPage implements OnInit {
     this.applyFilters();
   }
 
-  applyFilters() {
+  private applyFilters() {
     let filtered = [...this.products];
 
-    // Filtrar por búsqueda
     if (this.searchTerm) {
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(this.searchTerm) ||
-        p.description?.toLowerCase().includes(this.searchTerm)
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(this.searchTerm) ||
+        product.description?.toLowerCase().includes(this.searchTerm)
       );
     }
 
-    // Filtrar por estado
     switch (this.selectedFilter) {
       case 'active':
         filtered = filtered.filter(p => p.active);
         break;
       case 'lowStock':
-        filtered = filtered.filter(p => this.isLowStock(p));
+        filtered = filtered.filter(p => this.isLowStock(p) && p.active);
         break;
     }
 
     this.filteredProducts = filtered;
+  }
+
+  private calculateStats() {
+    this.totalProducts = this.products.filter(p => p.active).length;
+    this.lowStockCount = this.products.filter(p => this.isLowStock(p) && p.active).length;
   }
 
   isLowStock(product: Product): boolean {
@@ -146,24 +194,64 @@ export class ProductsPage implements OnInit {
     return this.productService.calculateProfitMargin(product);
   }
 
-  getStockStatus(product: Product): 'danger' | 'warning' | 'success' {
-    if (product.stock === 0) return 'danger';
-    if (this.isLowStock(product)) return 'warning';
-    return 'success';
+  getStockStatus(product: Product): string {
+    if (!product.active) return 'inactive';
+    if (product.stock === 0) return 'out-of-stock';
+    if (this.isLowStock(product)) return 'low-stock';
+    return 'in-stock';
   }
 
-  async viewProduct(product: Product) {
+  addProduct() {
+    this.router.navigate(['/products/new']);
+  }
+
+  viewProduct(product: Product) {
     this.router.navigate(['/products', product.id]);
   }
 
-  async editProduct(product: Product) {
-    this.router.navigate(['/products', 'edit', product.id]);
+  editProduct(product: Product) {
+    this.router.navigate(['/products', product.id]);
   }
+
+  // NUEVO: Abrir modal de publicación desde la lista
+  // NUEVO: Abrir modal de publicación desde la lista
+async openPublicacionModal(product: Product, event: Event) {
+  event.stopPropagation(); // Prevenir que se abra el detalle del producto
+
+  const modal = await this.modalController.create({
+    component: PublicacionModalComponent,
+    componentProps: {
+      productId: product.id,
+      currentPublicacion: product.publication,
+      productData: {
+        // ✅ Enviar TODOS los campos del producto
+        name: product.name,
+        description: product.description,
+        costPrice: product.costPrice,
+        salePrice: product.salePrice,
+        stock: product.stock,
+        minStock: product.minStock,
+        unit: product.unit,
+        active: product.active,
+        image: product.image
+        // publicacion se actualiza después
+      }
+    }
+  });
+
+  await modal.present();
+
+  const { data } = await modal.onWillDismiss();
+  if (data?.updated) {
+    // Recargar productos para obtener la actualización
+    this.loadProducts();
+  }
+}
 
   async deleteProduct(product: Product) {
     const alert = await this.alertController.create({
       header: 'Confirmar eliminación',
-      message: `¿Estás seguro de eliminar el producto "${product.name}"?`,
+      message: `¿Estás seguro de que deseas eliminar "${product.name}"?`,
       buttons: [
         {
           text: 'Cancelar',
@@ -173,7 +261,7 @@ export class ProductsPage implements OnInit {
           text: 'Eliminar',
           role: 'destructive',
           handler: () => {
-            this.confirmDelete(product.id!);
+            this.confirmDelete(product);
           }
         }
       ]
@@ -182,21 +270,19 @@ export class ProductsPage implements OnInit {
     await alert.present();
   }
 
-  private confirmDelete(id: number) {
-    this.productService.deleteProduct(id).subscribe({
+  private confirmDelete(product: Product) {
+    if (!product.id) return;
+
+    this.productService.deleteProduct(product.id).subscribe({
       next: () => {
         this.showToast('Producto eliminado correctamente', 'success');
         this.loadProducts();
       },
       error: (error) => {
         console.error('Error eliminando producto:', error);
-        this.showToast('Error al eliminar producto', 'danger');
+        this.showToast('Error al eliminar el producto', 'danger');
       }
     });
-  }
-
-  addProduct() {
-    this.router.navigate(['/products', 'new']);
   }
 
   private async showToast(message: string, color: 'success' | 'danger' | 'warning') {
@@ -209,11 +295,5 @@ export class ProductsPage implements OnInit {
     await toast.present();
   }
 
-  get lowStockCount(): number {
-    return this.products.filter(p => this.isLowStock(p) && p.active).length;
-  }
 
-  get totalProducts(): number {
-    return this.products.filter(p => p.active).length;
-  }
 }

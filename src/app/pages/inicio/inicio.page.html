@@ -1,13 +1,340 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>inicio</ion-title>
+<ion-header [translucent]="true" class="custom-header">
+  <ion-toolbar class="brand-toolbar primary">
+    <ion-buttons slot="start">
+      <ion-menu-button class="menu-btn"></ion-menu-button>
+    </ion-buttons>
+    <ion-title class="page-title">Inicio</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/sale-form" class="sale-btn">
+        <ion-icon name="cart-outline" slot="start" class="btn-icon"></ion-icon>
+        Venta
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">inicio</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="custom-content">
+
+  <!-- Refresher -->
+  <ion-refresher slot="fixed" (ionRefresh)="refresh($event)" class="custom-refresher">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Tira para actualizar"
+      refreshingSpinner="crescent"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Filtros -->
+  <ion-card class="filters-card">
+    <ion-card-header class="card-header">
+      <ion-card-title class="card-title">
+        <div class="title-container">
+          <ion-icon name="filter-outline" class="section-icon"></ion-icon>
+          Filtros
+        </div>
+      </ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="card-content">
+      <ion-list lines="full" class="filters-list">
+        <ion-item class="filter-item">
+          <ion-label class="filter-label">Periodo</ion-label>
+          <ion-segment [(ngModel)]="period" (ionChange)="onPeriodChange()" [ngModelOptions]="{standalone:true}" class="custom-segment">
+            <ion-segment-button value="7d" class="segment-btn">
+              <ion-label>7 días</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="30d" class="segment-btn">
+              <ion-label>30 días</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="custom" class="segment-btn">
+              <ion-label>Personalizado</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </ion-item>
+
+        <ng-container *ngIf="period === 'custom'">
+          <ion-item button (click)="openDate('start')" class="date-item">
+            <ion-icon name="calendar-outline" slot="start" class="date-icon"></ion-icon>
+            <ion-label class="date-label">
+              <h3>Desde</h3>
+              <p class="date-value">{{ formatDateShort(range.start) }}</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end" class="chevron-icon"></ion-icon>
+          </ion-item>
+
+          <ion-item button (click)="openDate('end')" class="date-item">
+            <ion-icon name="calendar-outline" slot="start" class="date-icon"></ion-icon>
+            <ion-label class="date-label">
+              <h3>Hasta</h3>
+              <p class="date-value">{{ formatDateShort(range.end) }}</p>
+            </ion-label>
+            <ion-icon name="chevron-forward-outline" slot="end" class="chevron-icon"></ion-icon>
+          </ion-item>
+        </ng-container>
+
+        <ion-item class="filter-item">
+          <ion-label class="filter-label">Tipo</ion-label>
+          <ion-segment [(ngModel)]="type" (ionChange)="applyFilters()" [ngModelOptions]="{standalone:true}" class="custom-segment">
+            <ion-segment-button value="ALL" class="segment-btn">
+              <ion-label>Todos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="INCOME" class="segment-btn">
+              <ion-label>Ingresos</ion-label>
+            </ion-segment-button>
+            <ion-segment-button value="EXPENSE" class="segment-btn">
+              <ion-label>Egresos</ion-label>
+            </ion-segment-button>
+          </ion-segment>
+        </ion-item>
+
+        <ion-item lines="none" class="action-item">
+          <ion-button expand="block" (click)="fetch()" [disabled]="loading" class="apply-filters-btn">
+            <ion-spinner *ngIf="loading" name="crescent" slot="start" class="btn-spinner"></ion-spinner>
+            <ion-icon *ngIf="!loading" name="refresh-outline" slot="start" class="btn-icon"></ion-icon>
+            Aplicar filtros
+          </ion-button>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- KPIs -->
+  <ion-grid class="kpi-grid">
+    <ion-row>
+      <ion-col size="12" sizeMd="4">
+        <ion-card class="kpi-card income animated-fade-in" [class.pulse]="totals.income > 0">
+          <ion-card-content class="kpi-content">
+            <div class="kpi-header">
+              <div class="kpi-icon-container income">
+                <ion-icon name="trending-up-outline" class="kpi-icon"></ion-icon>
+              </div>
+              <div class="kpi-title">Ingresos</div>
+            </div>
+            <div class="kpi-value">{{ formatCurrency(totals.income) }}</div>
+            <div class="kpi-trend" *ngIf="getTrend('income') !== 0">
+              <ion-icon [name]="getTrend('income') > 0 ? 'arrow-up-outline' : 'arrow-down-outline'"
+                       [class.positive]="getTrend('income') > 0"
+                       [class.negative]="getTrend('income') < 0"></ion-icon>
+              <span>{{ getTrend('income') > 0 ? '+' : '' }}{{ getTrend('income') }}%</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" sizeMd="4">
+        <ion-card class="kpi-card expense animated-fade-in" [class.pulse]="totals.expense > 0">
+          <ion-card-content class="kpi-content">
+            <div class="kpi-header">
+              <div class="kpi-icon-container expense">
+                <ion-icon name="trending-down-outline" class="kpi-icon"></ion-icon>
+              </div>
+              <div class="kpi-title">Egresos</div>
+            </div>
+            <div class="kpi-value">{{ formatCurrency(totals.expense) }}</div>
+            <div class="kpi-trend" *ngIf="getTrend('expense') !== 0">
+              <ion-icon [name]="getTrend('expense') > 0 ? 'arrow-up-outline' : 'arrow-down-outline'"
+                       [class.positive]="getTrend('expense') < 0"
+                       [class.negative]="getTrend('expense') > 0"></ion-icon>
+              <span>{{ getTrend('expense') > 0 ? '+' : '' }}{{ getTrend('expense') }}%</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" sizeMd="4">
+        <ion-card class="kpi-card net animated-fade-in" [class.pulse]="totals.net !== 0">
+          <ion-card-content class="kpi-content">
+            <div class="kpi-header">
+              <div class="kpi-icon-container net">
+                <ion-icon name="cash-outline" class="kpi-icon"></ion-icon>
+              </div>
+              <div class="kpi-title">Neto</div>
+            </div>
+            <div class="kpi-value" [class.positive]="totals.net > 0" [class.negative]="totals.net < 0">
+              {{ formatCurrency(totals.net) }}
+            </div>
+            <div class="kpi-trend" *ngIf="getTrend('net') !== 0">
+              <ion-icon [name]="getTrend('net') > 0 ? 'arrow-up-outline' : 'arrow-down-outline'"
+                       [class.positive]="getTrend('net') > 0"
+                       [class.negative]="getTrend('net') < 0"></ion-icon>
+              <span>{{ getTrend('net') > 0 ? '+' : '' }}{{ getTrend('net') }}%</span>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <!-- Lista de transacciones -->
+  <ion-card class="transactions-card">
+    <ion-card-header class="card-header">
+      <ion-card-title class="card-title">
+        <div class="title-container">
+          <ion-icon name="list-outline" class="section-icon"></ion-icon>
+          Movimientos
+        </div>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content class="card-content">
+      <ion-list *ngIf="!loading && transactions.length > 0" class="transactions-list">
+        <ion-item *ngFor="let t of transactions; trackBy: trackByTransaction"
+                 button detail="true"
+                 (click)="openTx(t)"
+                 class="transaction-item animated-fade-in">
+          <div class="transaction-icon-container" slot="start" [class]="t.type">
+            <ion-icon [name]="t.type === 'INCOME' ? 'arrow-up-circle-outline' : 'arrow-down-circle-outline'"
+                     class="transaction-icon"></ion-icon>
+          </div>
+
+          <ion-label class="transaction-label">
+            <h3 class="transaction-title">{{ t.description || (t.type === 'INCOME' ? 'Venta' : 'Egreso') }}</h3>
+            <p class="transaction-date">{{ formatDateTime(t.transactionDate) }}</p>
+          </ion-label>
+
+          <ion-badge [color]="t.type === 'INCOME' ? 'success' : 'danger'" class="transaction-amount">
+            {{ t.type === 'INCOME' ? '+' : '-' }}{{ formatCurrency(t.amount) }}
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+
+      <!-- Skeleton -->
+      <ng-container *ngIf="loading">
+        <ion-item *ngFor="let s of [1,2,3,4]" class="skeleton-item">
+          <ion-skeleton-text animated class="skeleton-icon" slot="start"></ion-skeleton-text>
+          <ion-label class="skeleton-label">
+            <ion-skeleton-text animated class="skeleton-title"></ion-skeleton-text>
+            <ion-skeleton-text animated class="skeleton-text"></ion-skeleton-text>
+          </ion-label>
+          <ion-skeleton-text animated class="skeleton-badge"></ion-skeleton-text>
+        </ion-item>
+      </ng-container>
+
+      <!-- Vacío -->
+      <div *ngIf="!loading && transactions.length === 0" class="empty-state animated-fade-in">
+        <div class="empty-icon-container">
+          <ion-icon name="file-tray-outline" class="empty-icon"></ion-icon>
+        </div>
+        <h3 class="empty-title">No hay movimientos</h3>
+        <p class="empty-text">No se encontraron movimientos en el rango seleccionado.</p>
+        <ion-button (click)="fetch()" fill="outline" class="empty-action-btn">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Reintentar
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- MODAL DETALLE DE TRANSACCIÓN -->
+  <ion-modal [isOpen]="showTxModal" (didDismiss)="closeTx()" class="tx-modal custom-modal">
+    <ng-template>
+      <ion-header class="modal-header">
+        <ion-toolbar class="modal-toolbar">
+          <ion-title class="modal-title">Detalle de Transacción</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeTx()" class="modal-close-btn">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="modal-content">
+        <ng-container *ngIf="selectedTx">
+          <ion-list lines="full" class="detail-list">
+            <ion-item class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Tipo</h3>
+                <p>{{ selectedTx.type === 'INCOME' ? 'Ingreso' : 'Egreso' }}</p>
+              </ion-label>
+              <ion-badge [color]="selectedTx.type === 'INCOME' ? 'success' : 'danger'" class="type-badge">
+                {{ selectedTx.type === 'INCOME' ? 'INGRESO' : 'EGRESO' }}
+              </ion-badge>
+            </ion-item>
+
+            <ion-item class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Monto</h3>
+                <p class="amount-value">{{ formatCurrency(selectedTx.amount) }}</p>
+              </ion-label>
+            </ion-item>
+
+            <ion-item class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Fecha</h3>
+                <p>{{ formatDateTime(selectedTx.transactionDate) }}</p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Producto y cantidad -->
+            <ion-item *ngIf="selectedTx?.productId" class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Producto</h3>
+                <p>ID: {{ selectedTx?.productId }}</p>
+              </ion-label>
+              <ion-badge color="primary" class="quantity-badge" *ngIf="selectedTx?.quantity">
+                x{{ selectedTx?.quantity }}
+              </ion-badge>
+            </ion-item>
+
+            <!-- Cliente -->
+            <ion-item *ngIf="selectedTx?.customer?.name || selectedTx?.customerId" class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Cliente</h3>
+                <p>{{ selectedTx?.customer?.name || ('ID: ' + selectedTx?.customerId) }}</p>
+              </ion-label>
+            </ion-item>
+
+            <!-- Descripción -->
+            <ion-item *ngIf="selectedTx.description" class="detail-item">
+              <ion-label class="detail-label">
+                <h3>Descripción</h3>
+                <p class="description-text">{{ selectedTx.description }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ng-container>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Modales de fecha -->
+ <!-- ... resto igual ... -->
+
+<!-- Modales de fecha -->
+<ion-modal [isOpen]="datePicker === 'start'" (didDismiss)="datePicker = null">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Desde</ion-title>
+        <ion-buttons slot="end"><ion-button (click)="datePicker = null">Cerrar</ion-button></ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-datetime
+        [value]="dateValue(range.start)"
+        [max]="todayDateValue"
+        presentation="date"
+        (ionChange)="setStart($event.detail.value)">
+      </ion-datetime>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<ion-modal [isOpen]="datePicker === 'end'" (didDismiss)="datePicker = null">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Hasta</ion-title>
+        <ion-buttons slot="end"><ion-button (click)="datePicker = null">Cerrar</ion-button></ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-datetime
+        [value]="dateValue(range.end)"
+        [max]="todayDateValue"
+        presentation="date"
+        (ionChange)="setEnd($event.detail.value)">
+      </ion-datetime>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+
 </ion-content>

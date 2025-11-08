@@ -1,0 +1,144 @@
+<!-- src/app/components/publicacion-modal/publicacion-modal.component.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="newspaper-outline"></ion-icon>
+      Gestionar Publicación
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="publicacionForm">
+
+    <!-- Detalles del producto (solo lectura) -->
+    <ion-card class="details-card">
+      <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="cube-outline"></ion-icon>
+          Detalles del Producto
+        </h3>
+        <div class="product-details-preview">
+          <pre>{{ getProductDetailsPreview() }}</pre>
+        </div>
+        <ion-note class="helper-note">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Estos detalles se enviarán automáticamente a la IA para generar una publicación personalizada
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Paso 1: Ingresar objetivo -->
+    <ion-card class="input-card">
+      <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="bulb-outline"></ion-icon>
+          1. Define tu objetivo
+        </h3>
+
+        <ion-item
+          lines="none"
+          [class.invalid-field]="isFieldInvalid('goal')"
+          [class.ion-focused]="publicacionForm.get('goal')?.dirty">
+          <ion-label position="stacked">
+            ¿Qué tipo de publicación necesitas? *
+          </ion-label>
+          <ion-textarea
+            formControlName="goal"
+            rows="4"
+            placeholder="Ej: Necesito un texto breve y llamativo para una publicación en redes sociales que destaque las características y beneficios del producto"
+            [counter]="true"
+            maxlength="500"
+            autocapitalize="sentences"
+          ></ion-textarea>
+        </ion-item>
+
+        <ion-note *ngIf="isFieldInvalid('goal')" color="danger">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          El objetivo debe tener al menos 10 caracteres
+        </ion-note>
+
+        <ion-button
+          expand="block"
+          (click)="generatePublicacion()"
+          [disabled]="isProcessing || publicacionForm.get('goal')?.invalid"
+          class="generate-btn"
+        >
+          <ion-spinner *ngIf="isProcessing" name="crescent" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isProcessing" name="send-outline" slot="start"></ion-icon>
+          {{ isProcessing ? 'Generando con IA...' : 'Generar Publicación con IA' }}
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Paso 2: Editar texto generado -->
+    <ion-card *ngIf="generatedText" class="output-card">
+      <ion-card-content>
+        <h3 class="section-title">
+          <ion-icon name="create-outline"></ion-icon>
+          2. Edita el texto generado
+        </h3>
+
+        <ion-item lines="none" class="ion-focused">
+          <ion-label position="stacked">
+            Texto de publicación (editable)
+          </ion-label>
+          <ion-textarea
+            formControlName="editableText"
+            rows="8"
+            placeholder="El texto generado por la IA aparecerá aquí..."
+            [counter]="true"
+            maxlength="2000"
+            autocapitalize="sentences"
+          ></ion-textarea>
+        </ion-item>
+
+        <div class="text-stats" *ngIf="publicacionForm.get('editableText')?.value">
+          <ion-chip color="medium" outline>
+            <ion-icon name="text-outline"></ion-icon>
+            <ion-label>{{ getCharacterCount() }} / 2000 caracteres</ion-label>
+          </ion-chip>
+        </div>
+
+        <ion-button
+          expand="block"
+          color="success"
+          (click)="publishPublicacion()"
+          [disabled]="isPublishing || !publicacionForm.get('editableText')?.value"
+          class="publish-btn"
+        >
+          <ion-spinner *ngIf="isPublishing" name="crescent" slot="start"></ion-spinner>
+          <ion-icon *ngIf="!isPublishing" name="cloud-upload-outline" slot="start"></ion-icon>
+          {{ isPublishing ? 'Publicando...' : 'Guardar Publicación' }}
+        </ion-button>
+
+        <ion-note class="helper-note">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Al guardar, se actualizará el campo "publicación" del producto y su fecha de modificación. Puedes editarlo en cualquier momento.
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Mensaje cuando no hay texto generado aún -->
+    <ion-card *ngIf="!generatedText && !isProcessing" class="info-card">
+      <ion-card-content>
+        <ion-note class="info-note">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <div>
+            <strong>¿Cómo funciona?</strong>
+            <p>1. Define qué tipo de publicación necesitas</p>
+            <p>2. La IA generará un texto profesional basado en los datos del producto</p>
+            <p>3. Edita el texto a tu gusto y guárdalo</p>
+            <p>4. La publicación quedará vinculada a este producto</p>
+          </div>
+        </ion-note>
+      </ion-card-content>
+    </ion-card>
+
+  </form>
+</ion-content>

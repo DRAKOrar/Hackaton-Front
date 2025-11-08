@@ -1,10 +1,9 @@
 <!-- src/app/pages/products/products.page.html -->
 <ion-header [translucent]="true" class="custom-header">
   <ion-toolbar class="brand-toolbar">
-    <!-- En el <ion-toolbar> de las páginas donde quieres el menú -->
-<ion-buttons slot="start">
-  <ion-menu-button></ion-menu-button>
-</ion-buttons>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
 
     <ion-title class="page-title">
       <ion-icon name="cube-outline" class="title-icon"></ion-icon>
@@ -115,6 +114,11 @@
                 <ion-icon name="warning-outline"></ion-icon>
                 Stock bajo
               </ion-badge>
+              <!-- NUEVO: Badge de publicación -->
+              <ion-badge *ngIf="product.publication" color="tertiary" class="publicacion-badge">
+                <ion-icon name="newspaper-outline"></ion-icon>
+                Publicado
+              </ion-badge>
             </div>
           </div>
 
@@ -133,6 +137,19 @@
               <ion-icon name="trending-up-outline"></ion-icon>
               <ion-label>Margen: {{ getProfitMargin(product) | number:'1.1-1' }}%</ion-label>
             </ion-chip>
+          </div>
+
+          <!-- NUEVO: Botón de publicación -->
+          <div class="product-actions">
+            <ion-button
+              size="small"
+              fill="outline"
+              color="tertiary"
+              (click)="openPublicacionModal(product, $event)"
+            >
+              <ion-icon name="newspaper-outline" slot="start"></ion-icon>
+              {{ product.publication ? 'Ver publicación' : 'Publicar' }}
+            </ion-button>
           </div>
         </ion-label>
 

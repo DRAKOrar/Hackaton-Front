@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonNote, IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonChip, ToastController, AlertController, IonGrid, IonRow, IonCol, IonImg, IonMenuButton } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonButton, IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonInput, IonTextarea, IonSelect, IonSelectOption, IonNote, IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonChip, ToastController, AlertController, IonGrid, IonRow, IonCol, IonImg, IonMenuButton, ModalController, IonItemOption, IonItemOptions, IonBadge, IonSegmentButton } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   saveOutline,
@@ -12,19 +12,21 @@ import {
   checkmarkOutline,
   cameraOutline,
   imageOutline,
-  trashOutline, cubeOutline, businessOutline, warningOutline
-} from 'ionicons/icons';
+  trashOutline,
+  cubeOutline,
+  businessOutline,
+  warningOutline,
+  newspaperOutline, refreshOutline, cashOutline, cartOutline, createOutline, addOutline, checkmarkCircleOutline } from 'ionicons/icons';
 import { Product, ProductService } from '../../services/product-service';
-
-// Capacitor Camera (opcional pero recomendado en móviles)
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { PublicacionModalComponent } from '../../components/publicacion-modal/publicacion-modal.component';
 
 @Component({
   selector: 'app-product-form',
   templateUrl: './product-form.page.html',
   styleUrls: ['./product-form.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonSegmentButton, IonBadge, IonItemOptions, IonItemOption,
     CommonModule,
     ReactiveFormsModule,
     IonHeader,
@@ -63,6 +65,7 @@ export class ProductFormPage implements OnInit {
   private route = inject(ActivatedRoute);
   private toastController = inject(ToastController);
   private alertController = inject(AlertController);
+  private modalController = inject(ModalController);
 
   productForm: FormGroup;
   isLoading = false;
@@ -71,17 +74,13 @@ export class ProductFormPage implements OnInit {
   productId?: number;
   product?: Product;
 
-  // Propiedades como variables regulares (no getters)
   profitPerUnit: number = 0;
   profitMargin: number = 0;
   isProfitPositive: boolean = true;
   showProfitIndicators: boolean = false;
   showLowStockWarning: boolean = false;
-
-  // Vista previa (data URL) para mostrar imagen
   imagePreview: string | null = null;
 
-  // Unidades predefinidas
   units = [
     'unidad',
     'kilogramos',
@@ -95,7 +94,7 @@ export class ProductFormPage implements OnInit {
   ];
 
   constructor() {
-    addIcons({ closeOutline, imageOutline, trashOutline, cameraOutline, cubeOutline, calculatorOutline, trendingUpOutline, businessOutline, warningOutline, saveOutline, checkmarkOutline });
+    addIcons({closeOutline,imageOutline,trashOutline,cameraOutline,cubeOutline,calculatorOutline,trendingUpOutline,businessOutline,warningOutline,newspaperOutline,checkmarkCircleOutline,saveOutline,refreshOutline,cashOutline,cartOutline,createOutline,addOutline,checkmarkOutline});
 
     this.productForm = this.createForm();
     this.setupFormListeners();
@@ -121,12 +120,12 @@ export class ProductFormPage implements OnInit {
       minStock: [0, [Validators.required, Validators.min(0)]],
       unit: ['unidad', [Validators.required]],
       active: [true],
-      image: [''] // <<--- NUEVO: guardará SOLO el base64 "puro" (sin prefijo data:)
+      image: [''],
+      publication: [null] // Nuevo campo, siempre null al crear
     });
   }
 
   private setupFormListeners() {
-    // Escuchar cambios en precios para calcular ganancias
     this.productForm.get('costPrice')?.valueChanges.subscribe(() => {
       this.calculateSuggestedPrice();
       this.calculateProfitIndicators();
@@ -136,7 +135,6 @@ export class ProductFormPage implements OnInit {
       this.calculateProfitIndicators();
     });
 
-    // Escuchar cambios en stock para verificar alertas
     this.productForm.get('stock')?.valueChanges.subscribe(() => {
       this.checkStockWarning();
     });
@@ -155,7 +153,6 @@ export class ProductFormPage implements OnInit {
         this.product = product;
         this.populateForm(product);
         this.isLoading = false;
-        // Calcular valores iniciales después de cargar
         this.calculateProfitIndicators();
         this.checkStockWarning();
       },
@@ -178,10 +175,10 @@ export class ProductFormPage implements OnInit {
       minStock: product.minStock,
       unit: product.unit || 'unidad',
       active: product.active ?? true,
-      image: product.image || ''
+      image: product.image || '',
+      publication: product.publication || null
     });
 
-    // Si ya hay imagen en el producto, arma la data URL para previsualización
     if (product.image) {
       this.imagePreview = this.base64ToDataUrl(product.image);
     }
@@ -197,7 +194,6 @@ export class ProductFormPage implements OnInit {
     }
   }
 
-  // Métodos para el template
   onImageLoad() {
     console.log('Imagen cargada correctamente');
   }
@@ -232,39 +228,21 @@ export class ProductFormPage implements OnInit {
     this.showLowStockWarning = stock > 0 && minStock > 0 && stock <= minStock * 1.5;
   }
 
-  // Getters para compatibilidad (opcional, si los usas en el template)
-  get profitPerUnitGetter(): number {
-    return this.profitPerUnit;
-  }
-
-  get profitMarginGetter(): number {
-    return this.profitMargin;
-  }
-
-  get isProfitPositiveGetter(): boolean {
-    return this.isProfitPositive;
-  }
-
-  // ---------- IMAGEN: cámara / archivo ----------
-
   async takePhoto() {
     try {
       const photo = await Camera.getPhoto({
         quality: 80,
-        resultType: CameraResultType.Base64, // obtenemos base64 directo
+        resultType: CameraResultType.Base64,
         source: CameraSource.Camera,
-        width: 1024 // redimensiona para no enviar imágenes gigantes
+        width: 1024
       });
 
       if (photo.base64String) {
-        // Guardamos el base64 "puro" en el form (lo que pide el back)
         this.productForm.patchValue({ image: photo.base64String });
-        // Armamos una data URL para previsualizar
         const mime = photo.format ? `image/${photo.format}` : 'image/jpeg';
         this.imagePreview = `data:${mime};base64,${photo.base64String}`;
       }
     } catch (e) {
-      // usuario canceló o error
       console.log('Usuario canceló la cámara o hubo un error:', e);
     }
   }
@@ -280,9 +258,9 @@ export class ProductFormPage implements OnInit {
     const file = input.files[0];
     try {
       const dataUrl = await this.readFileAsDataUrl(file);
-      this.imagePreview = dataUrl; // para mostrar
+      this.imagePreview = dataUrl;
       const pureBase64 = this.dataUrlToBase64(dataUrl);
-      this.productForm.patchValue({ image: pureBase64 }); // lo que manda al back
+      this.productForm.patchValue({ image: pureBase64 });
     } catch (error) {
       console.error('Error al leer el archivo:', error);
       this.showToast('Error al cargar la imagen', 'danger');
@@ -304,7 +282,6 @@ export class ProductFormPage implements OnInit {
   }
 
   private dataUrlToBase64(dataUrl: string): string {
-    // "data:image/png;base64,AAAA..." -> "AAAA..."
     const commaIndex = dataUrl.indexOf(',');
     return commaIndex >= 0 ? dataUrl.substring(commaIndex + 1) : dataUrl;
   }
@@ -313,7 +290,37 @@ export class ProductFormPage implements OnInit {
     return `data:${mime};base64,${base64}`;
   }
 
-  // ---------- Guardado ----------
+  // Nuevo método para abrir el modal de publicación
+  // Nuevo método para abrir el modal de publicación
+async openPublicacionModal() {
+  const modal = await this.modalController.create({
+    component: PublicacionModalComponent,
+    componentProps: {
+      productId: this.productId,
+      currentPublicacion: this.productForm.get('publicacion')?.value,
+      productData: {
+        // ✅ Enviar TODOS los campos del formulario
+        name: this.productForm.get('name')?.value,
+        description: this.productForm.get('description')?.value,
+        costPrice: this.productForm.get('costPrice')?.value,
+        salePrice: this.productForm.get('salePrice')?.value,
+        stock: this.productForm.get('stock')?.value,
+        minStock: this.productForm.get('minStock')?.value,
+        unit: this.productForm.get('unit')?.value,
+        active: this.productForm.get('active')?.value,
+        image: this.productForm.get('image')?.value
+      }
+    }
+  });
+
+  await modal.present();
+
+  const { data } = await modal.onWillDismiss();
+  if (data?.updated) {
+    // Recargar el producto para obtener el campo actualizado
+    this.loadProduct();
+  }
+}
 
   async onSubmit() {
     if (this.productForm.invalid) {
@@ -340,7 +347,12 @@ export class ProductFormPage implements OnInit {
 
   private saveProduct() {
     this.isSaving = true;
-    const formData = this.productForm.value;
+    const formData = { ...this.productForm.value };
+
+    // Si es creación, asegurar que publicacion sea null
+    if (!this.isEditMode) {
+      formData.publicacion = null;
+    }
 
     if (this.isEditMode && this.productId) {
       this.productService.updateProduct(this.productId, formData).subscribe({
@@ -402,7 +414,6 @@ export class ProductFormPage implements OnInit {
     await toast.present();
   }
 
-  // Helpers validación en template
   isFieldInvalid(fieldName: string): boolean {
     const field = this.productForm.get(fieldName);
     return !!(field && field.invalid && field.touched);

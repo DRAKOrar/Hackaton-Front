@@ -5,6 +5,19 @@ import { AuthService, RegisterRequest } from 'src/app/services/auth-service';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import {
+  cartOutline, closeOutline, cubeOutline, cashOutline, calculatorOutline, calendarOutline,
+  chevronForwardOutline, warningOutline, checkmarkCircleOutline, saveOutline, peopleOutline,
+  checkmark,
+  alertCircleOutline,
+  cardOutline,
+  personOutline,
+  personAddOutline,
+  keyOutline,
+  atOutline,
+  mailOutline
+} from 'ionicons/icons';
+
+import {
   IonHeader,
   IonToolbar,
   IonTitle,
@@ -17,6 +30,7 @@ import {
   IonButton,
   IonDatetime, IonSpinner, IonIcon, IonCol, IonRow, IonProgressBar, IonGrid, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonButtons, IonBackButton } from '@ionic/angular/standalone';
 import { Router, RouterLink } from '@angular/router';
+import { addIcons } from 'ionicons';
 function pastDateValidator(control: AbstractControl): ValidationErrors | null {
   const v = control.value as string | null;
   if (!v) return { required: true };
@@ -56,6 +70,11 @@ export class RegisterComponent {
 
   constructor() {
     this.registerForm = this.createForm();
+    addIcons({
+          cartOutline, closeOutline, cubeOutline, cashOutline, calculatorOutline, calendarOutline,
+          chevronForwardOutline, warningOutline, checkmarkCircleOutline, saveOutline, peopleOutline,checkmark, alertCircleOutline, cardOutline, personOutline,personAddOutline, keyOutline, atOutline, mailOutline
+        });
+
   }
 
   private createForm(): FormGroup {

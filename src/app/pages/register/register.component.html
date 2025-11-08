@@ -32,8 +32,7 @@
                 <ion-label position="floating">Username</ion-label>
                 <ion-input
                   formControlName="username"
-                  type="text"
-                  placeholder="Tu nombre de usuario">
+                  type="text" >
                 </ion-input>
               </ion-item>
               <ion-note *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="error-note">
@@ -55,8 +54,7 @@
                 <ion-label position="floating">Email</ion-label>
                 <ion-input
                   formControlName="email"
-                  type="email"
-                  placeholder="correo@ejemplo.com">
+                  type="email" >
                 </ion-input>
               </ion-item>
               <ion-note *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="error-note">
@@ -78,8 +76,7 @@
                 <ion-label position="floating">Contraseña</ion-label>
                 <ion-input
                   formControlName="password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres">
+                  type="password" >
                 </ion-input>
               </ion-item>
               <ion-note *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="error-note">
@@ -112,8 +109,7 @@
                       <ion-label position="floating">Nombre</ion-label>
                       <ion-input
                         formControlName="firstName"
-                        type="text"
-                        placeholder="Tu nombre">
+                        type="text" >
                       </ion-input>
                     </ion-item>
                     <ion-note *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" class="error-note">
@@ -130,8 +126,7 @@
                       <ion-label position="floating">Apellido</ion-label>
                       <ion-input
                         formControlName="lastName"
-                        type="text"
-                        placeholder="Tu apellido">
+                        type="text" >
                       </ion-input>
                     </ion-item>
                     <ion-note *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" class="error-note">
@@ -150,8 +145,7 @@
                 <ion-label position="floating">Documento de Identidad</ion-label>
                 <ion-input
                   formControlName="identityDocument"
-                  type="text"
-                  placeholder="Número de documento">
+                  type="text" >
                 </ion-input>
               </ion-item>
               <ion-note *ngIf="registerForm.get('identityDocument')?.invalid && registerForm.get('identityDocument')?.touched" class="error-note">
