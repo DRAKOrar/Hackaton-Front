@@ -1,375 +1,492 @@
-// Variables de colores
-$color-primary: #FFB22C;
-$color-secondary: #379777;
-$color-dark: #000000;
-$color-light: #F7F7F7;
-$color-white: #ffffff;
-$color-success: #379777;
-$color-danger: #dc3545;
-$color-text-muted: #666666;
-
-// Header del modal
-ion-header {
-  ion-toolbar {
-    --background: linear-gradient(135deg, #{$color-primary} 0%, #e6a128 100%);
-    --color: #{$color-dark};
-
-    ion-title {
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-
-    ion-button {
-      --color: #{$color-dark};
-
-      &:hover {
-        opacity: 0.8;
-      }
-    }
-  }
+:host {
+  --brand-dark: #132440;
+  --brand-mid: #16476A;
+  --brand-teal: #3B9797;
+  --brand-accent: #BF092F;
+  --text-strong: #1f2a37;
+  --text-muted: #6b7280;
+  --bg-soft: #f5f7fa;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
 }
 
-// Contenido principal
-ion-content {
-  --background: linear-gradient(135deg, #{$color-light} 0%, #{$color-white} 100%);
+/* Header del modal */
+.custom-header {
+  box-shadow: 0 2px 12px rgba(19, 36, 64, 0.1);
 }
 
-// Títulos de sección
-.section-title {
-  font-size: 1.1rem;
+.brand-toolbar.primary {
+  --background: var(--brand-dark);
+  --color: white;
+}
+
+.modal-title {
   font-weight: 600;
-  color: $color-dark;
-  margin-bottom: 1rem;
+}
+
+.title-container {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-
-  ion-icon {
-    color: $color-primary;
-    font-size: 1.3rem;
-  }
+  gap: 10px;
 }
 
-// Card de detalles del producto
-.details-card {
-  margin: 0 0 1.5rem 0;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, $color-secondary, $color-primary);
-  }
-
-  ion-card-content {
-    padding: 1.5rem;
-  }
-
-  .product-details-preview {
-    background: $color-light;
-    border-radius: 12px;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-left: 4px solid $color-secondary;
-
-    pre {
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      color: $color-dark;
-      margin: 0;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-    }
-  }
-
-  .helper-note {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: $color-text-muted;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    font-style: italic;
-
-    ion-icon {
-      color: $color-primary;
-    }
-  }
+.title-icon {
+  font-size: 1.4rem;
 }
 
-// Card de input (objetivo)
-.input-card {
-  margin: 0 0 1.5rem 0;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  position: relative;
+.close-btn {
+  --border-radius: 50%;
+  --color: white;
   transition: all 0.3s ease;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, $color-primary, #e6a128);
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
-  }
-
-  ion-card-content {
-    padding: 1.5rem;
-  }
-
-  ion-item {
-    --background: $color-light;
-    --border-radius: 12px;
-    --padding-start: 1rem;
-    --padding-end: 1rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-
-    &.ion-focused {
-      --background: #{$color-white};
-      border-color: $color-primary;
-      box-shadow: 0 0 0 4px rgba(255, 178, 44, 0.1);
-    }
-
-    &.invalid-field {
-      border-color: $color-danger;
-      --background: rgba(220, 53, 69, 0.05);
-    }
-
-    ion-label {
-      font-weight: 600;
-      color: $color-dark;
-      margin-bottom: 0.5rem;
-    }
-
-    ion-textarea {
-      --padding-top: 0.5rem;
-      --padding-bottom: 0.5rem;
-      font-size: 1rem;
-      color: $color-dark;
-    }
-  }
-
-  ion-note {
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
-    background: rgba(220, 53, 69, 0.1);
-    border-left: 3px solid $color-danger;
-    margin-top: 0.5rem;
-    font-size: 0.85rem;
-
-    ion-icon {
-      font-size: 1rem;
-    }
-  }
 }
 
-// Botón de generar
-.generate-btn {
-  --background: linear-gradient(135deg, #{$color-primary} 0%, #e6a128 100%);
-  --background-hover: linear-gradient(135deg, #e6a128 0%, #d4941f 100%);
-  --color: #{$color-dark};
-  --border-radius: 12px;
-  --box-shadow: 0 6px 20px rgba(255, 178, 44, 0.3);
+.close-btn:hover {
+  --background: rgba(255, 255, 255, 0.1);
+  transform: rotate(90deg);
+}
 
-  height: 50px;
+.close-icon {
+  font-size: 1.4rem;
+}
+
+/* Contenido principal */
+.custom-content {
+  --background: var(--bg-soft);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 80px;
+}
+
+.publicacion-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Tarjetas de sección */
+.form-section-card {
+  --background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(19, 36, 64, 0.08);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.form-section-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(19, 36, 64, 0.12);
+}
+
+.card-header {
+  padding: 20px 20px 0;
+  border-bottom: 1px solid var(--bg-soft);
+}
+
+.card-title {
+  font-size: 1.2rem;
   font-weight: 600;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 1rem;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &:hover {
-    --box-shadow: 0 10px 30px rgba(255, 178, 44, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    transform: none;
-  }
+  color: var(--text-strong);
 }
 
-// Card de output (texto generado)
-.output-card {
-  margin: 0 0 1.5rem 0;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  position: relative;
-  animation: slideInUp 0.5s ease-out;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, $color-secondary, $color-primary);
-  }
-
-  ion-card-content {
-    padding: 1.5rem;
-  }
-
-  ion-item {
-    --background: $color-white;
-    --border-radius: 12px;
-    --padding-start: 1rem;
-    --padding-end: 1rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    border: 2px solid $color-secondary;
-    box-shadow: 0 4px 15px rgba(55, 151, 119, 0.1);
-
-    &.ion-focused {
-      border-color: $color-primary;
-      box-shadow: 0 0 0 4px rgba(255, 178, 44, 0.1);
-    }
-
-    ion-label {
-      font-weight: 600;
-      color: $color-dark;
-      margin-bottom: 0.5rem;
-    }
-
-    ion-textarea {
-      --padding-top: 0.5rem;
-      --padding-bottom: 0.5rem;
-      font-size: 1rem;
-      color: $color-dark;
-      line-height: 1.6;
-    }
-  }
-
-  .helper-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    color: $color-text-muted;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    padding: 0.75rem;
-    background: rgba(55, 151, 119, 0.05);
-    border-radius: 8px;
-    border-left: 3px solid $color-secondary;
-
-    ion-icon {
-      color: $color-secondary;
-      flex-shrink: 0;
-      margin-top: 0.2rem;
-    }
-  }
+.section-icon {
+  font-size: 1.3rem;
+  color: var(--brand-teal);
 }
 
-// Botón de publicar
-.publish-btn {
-  --background: linear-gradient(135deg, #{$color-secondary} 0%, #2d7a61 100%);
-  --background-hover: linear-gradient(135deg, #2d7a61 0%, #246350 100%);
-  --color: #{$color-white};
-  --border-radius: 12px;
-  --box-shadow: 0 6px 20px rgba(55, 151, 119, 0.3);
+.card-content {
+  padding: 20px;
+}
 
-  height: 50px;
+/* Encabezado de pasos */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--brand-teal);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.9rem;
   font-weight: 600;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 1rem;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &:hover {
-    --box-shadow: 0 10px 30px rgba(55, 151, 119, 0.4);
-    transform: translateY(-2px);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    transform: none;
-  }
 }
 
-// Nota informativa final
-.info-note {
+/* Detalles del producto */
+.details-card {
+  border-left: 4px solid var(--brand-teal);
+}
+
+.product-details-preview {
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(59, 151, 151, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.product-details-text {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-strong);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Campos de entrada */
+.input-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  margin-bottom: 20px;
+}
+
+.input-label {
+  font-weight: 600;
+  color: var(--text-strong);
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.custom-textarea {
+  --background: var(--bg-soft);
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  min-height: 120px;
+}
+
+.custom-textarea:hover {
+  --background: rgba(59, 151, 151, 0.05);
+  border-color: rgba(59, 151, 151, 0.2);
+}
+
+.custom-textarea.ion-focused {
+  border-color: var(--brand-teal);
+}
+
+.editable-text {
+  min-height: 200px;
+}
+
+.invalid-field .custom-textarea {
+  border-color: var(--brand-accent);
+}
+
+/* Mensajes de error */
+.error-message {
+  color: var(--brand-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.error-icon {
+  font-size: 1rem;
+}
+
+/* Notas de ayuda */
+.helper-note {
+  color: var(--text-muted);
+  font-size: 0.85rem;
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  color: $color-text-muted;
-  font-size: 0.9rem;
-  padding: 1rem;
-  background: $color-white;
-  border-radius: 12px;
-  border: 2px solid $color-light;
-  margin-top: 1rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  border-left: 3px solid var(--brand-teal);
+}
 
-  ion-icon {
-    color: $color-primary;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    margin-top: 0.2rem;
+.helper-note.success {
+  border-left-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.helper-icon {
+  font-size: 1.1rem;
+  color: var(--brand-teal);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.helper-note.success .helper-icon {
+  color: var(--success-color);
+}
+
+/* Características de IA */
+.ai-features {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--bg-soft);
+}
+
+.features-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.features-note ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.features-note li {
+  margin-bottom: 4px;
+}
+
+/* Botones de acción */
+.action-btn {
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+}
+
+.generate-btn {
+  --background: var(--brand-teal);
+  --background-hover: var(--brand-mid);
+  --color: white;
+  box-shadow: 0 4px 12px rgba(59, 151, 151, 0.3);
+}
+
+.generate-btn:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 151, 151, 0.4);
+}
+
+.publish-btn {
+  --background: var(--success-color);
+  --background-hover: #059669;
+  --color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.publish-btn:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.regenerate-btn {
+  --border-radius: 12px;
+  --border-width: 2px;
+  --border-color: var(--text-muted);
+  --color: var(--text-muted);
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-top: 12px;
+}
+
+.regenerate-btn:hover:not([disabled]) {
+  --background: var(--text-muted);
+  --color: white;
+  transform: translateY(-2px);
+}
+
+.btn-spinner {
+  --color: white;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+/* Estadísticas de texto */
+.text-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.stats-chip {
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.stats-chip:hover {
+  transform: translateY(-2px);
+}
+
+.chip-icon {
+  font-size: 0.9rem;
+}
+
+/* Guía de pasos */
+.steps-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.step-item:hover {
+  background: rgba(59, 151, 151, 0.05);
+  transform: translateX(4px);
+}
+
+.step-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(19, 36, 64, 0.1);
+  flex-shrink: 0;
+}
+
+.step-number {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  background: var(--brand-teal);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+  color: var(--brand-teal);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.step-content p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Procesamiento de IA */
+.ai-processing {
+  margin-bottom: 20px;
+}
+
+.processing-card {
+  border-left: 4px solid var(--brand-teal);
+}
+
+.processing-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.processing-spinner {
+  --color: var(--brand-teal);
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+}
+
+.processing-title {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.processing-text {
+  margin: 0 0 20px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.processing-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: var(--brand-teal);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-// Animaciones
-@keyframes slideInUp {
+/* Botones de acción agrupados */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+/* Animaciones */
+.animated-fade-in {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -377,126 +494,47 @@ ion-content {
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-// Responsive
+/* Responsive */
 @media (max-width: 768px) {
-  .details-card,
-  .input-card,
-  .output-card {
-    ion-card-content {
-      padding: 1rem;
-    }
+  .custom-content {
+    --padding-start: 12px;
+    --padding-end: 12px;
   }
 
-  .section-title {
-    font-size: 1rem;
+  .card-content {
+    padding: 16px;
   }
 
-  .generate-btn,
-  .publish-btn {
-    height: 48px;
-    font-size: 0.95rem;
-  }
-}
-
-// Estados de carga
-ion-spinner {
-  --color: currentColor;
-  width: 20px;
-  height: 20px;
-}
-
-// Card de información (cuando no hay texto)
-.info-card {
-  margin: 0 0 1.5rem 0;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  background: linear-gradient(135deg, $color-white 0%, $color-light 100%);
-  border: 2px solid $color-primary;
-
-  ion-card-content {
-    padding: 1.5rem;
+  .step-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
   }
 
-  .info-note {
-    display: flex;
+  .step-icon-container {
+    align-self: center;
+  }
+
+  .text-stats {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+  }
 
-    ion-icon {
-      color: $color-primary;
-      font-size: 2rem;
-      flex-shrink: 0;
-      margin-top: 0.2rem;
-    }
-
-    div {
-      flex: 1;
-
-      strong {
-        color: $color-dark;
-        font-size: 1.1rem;
-        display: block;
-        margin-bottom: 0.75rem;
-      }
-
-      p {
-        margin: 0.5rem 0;
-        color: $color-text-muted;
-        font-size: 0.9rem;
-        padding-left: 1rem;
-        position: relative;
-
-        &::before {
-          content: '•';
-          position: absolute;
-          left: 0;
-          color: $color-primary;
-          font-weight: bold;
-        }
-      }
-    }
+  .action-buttons {
+    flex-direction: column;
   }
 }
 
-// Estadísticas de texto
-.text-stats {
-  margin: 0.75rem 0;
-  display: flex;
-  gap: 0.5rem;
-
-  ion-chip {
-    font-size: 0.85rem;
-
-    ion-icon {
-      font-size: 1rem;
-      margin-right: 0.25rem;
-    }
+@media (max-width: 480px) {
+  .product-details-preview {
+    max-height: 150px;
   }
-}
 
-// Toast personalizado
-.custom-toast {
-  --background: #{$color-white};
-  --color: #{$color-dark};
-  --border-radius: 12px;
-  --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
+  .custom-textarea {
+    min-height: 100px;
+  }
 
-// Mejoras de accesibilidad
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .editable-text {
+    min-height: 150px;
   }
 }

@@ -18,8 +18,7 @@ import {
   IonCardContent,
   ModalController,
   ToastController,
-  IonChip
-} from '@ionic/angular/standalone';
+  IonChip, IonCardTitle, IonCardHeader } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   closeOutline,
@@ -32,8 +31,7 @@ import {
   bulbOutline,
   alertCircleOutline,
   createOutline,
-  textOutline
-} from 'ionicons/icons';
+  textOutline, sparklesOutline, refreshOutline } from 'ionicons/icons';
 import { ProductService } from '../../services/product-service';
 
 @Component({
@@ -41,7 +39,7 @@ import { ProductService } from '../../services/product-service';
   templateUrl: './publicacion-modal.component.html',
   styleUrls: ['./publicacion-modal.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonCardHeader, IonCardTitle,
     IonChip,
     CommonModule,
     ReactiveFormsModule,
@@ -78,19 +76,7 @@ export class PublicacionModalComponent implements OnInit {
   generatedText: string | null = null;
 
   constructor() {
-    addIcons({
-      newspaperOutline,
-      closeOutline,
-      cubeOutline,
-      informationCircleOutline,
-      bulbOutline,
-      alertCircleOutline,
-      sendOutline,
-      createOutline,
-      textOutline,
-      cloudUploadOutline,
-      checkmarkCircleOutline
-    });
+    addIcons({newspaperOutline,closeOutline,cubeOutline,informationCircleOutline,bulbOutline,alertCircleOutline,sparklesOutline,createOutline,textOutline,cloudUploadOutline,refreshOutline,checkmarkCircleOutline,sendOutline});
 
     this.publicacionForm = this.fb.group({
       goal: ['', [Validators.required, Validators.minLength(10)]],
@@ -259,4 +245,43 @@ export class PublicacionModalComponent implements OnInit {
     const text = this.publicacionForm.get('editableText')?.value || '';
     return text.length;
   }
+
+  // En tu componente, agrega estos métodos:
+
+ 
+
+getTextQuality(): string {
+  const count = this.getCharacterCount();
+  if (count < 50) return 'Muy corto';
+  if (count < 150) return 'Corto';
+  if (count < 300) return 'Ideal';
+  if (count < 500) return 'Largo';
+  return 'Muy largo';
+}
+
+getTextQualityColor(): string {
+  const count = this.getCharacterCount();
+  if (count < 50) return 'danger';
+  if (count < 150) return 'warning';
+  if (count < 500) return 'success';
+  return 'warning';
+}
+
+getTextQualityIcon(): string {
+  const count = this.getCharacterCount();
+  if (count < 50) return 'alert-circle-outline';
+  if (count < 150) return 'time-outline';
+  if (count < 500) return 'checkmark-circle-outline';
+  return 'warning-outline';
+}
+
+// Para regenerar la publicación
+regeneratePublicacion() {
+  if (this.publicacionForm.get('goal')?.valid) {
+    this.generatePublicacion();
+  }
+}
+
+// Animación de entrada
+// El CSS ya maneja las animaciones con la clase animated-fade-in
 }

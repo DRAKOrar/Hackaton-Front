@@ -1,51 +1,64 @@
 <!-- src/app/components/publicacion-modal/publicacion-modal.component.html -->
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>
-      <ion-icon name="newspaper-outline"></ion-icon>
-      Gestionar Publicación
+<ion-header class="custom-header">
+  <ion-toolbar class="brand-toolbar primary">
+    <ion-title class="modal-title">
+      <div class="title-container">
+        <ion-icon name="newspaper-outline" class="title-icon"></ion-icon>
+        Gestionar Publicación
+      </div>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="close()">
-        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      <ion-button (click)="close()" class="close-btn" fill="clear">
+        <ion-icon name="close-outline" slot="icon-only" class="close-icon"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="publicacionForm">
+<ion-content class="custom-content">
+  <form [formGroup]="publicacionForm" class="publicacion-form">
 
     <!-- Detalles del producto (solo lectura) -->
-    <ion-card class="details-card">
-      <ion-card-content>
-        <h3 class="section-title">
-          <ion-icon name="cube-outline"></ion-icon>
-          Detalles del Producto
-        </h3>
+    <ion-card class="form-section-card details-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="cube-outline" class="section-icon"></ion-icon>
+            Detalles del Producto
+          </div>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="card-content">
         <div class="product-details-preview">
-          <pre>{{ getProductDetailsPreview() }}</pre>
+          <pre class="product-details-text">{{ getProductDetailsPreview() }}</pre>
         </div>
         <ion-note class="helper-note">
-          <ion-icon name="information-circle-outline"></ion-icon>
+          <ion-icon name="information-circle-outline" class="helper-icon"></ion-icon>
           Estos detalles se enviarán automáticamente a la IA para generar una publicación personalizada
         </ion-note>
       </ion-card-content>
     </ion-card>
 
     <!-- Paso 1: Ingresar objetivo -->
-    <ion-card class="input-card">
-      <ion-card-content>
-        <h3 class="section-title">
-          <ion-icon name="bulb-outline"></ion-icon>
-          1. Define tu objetivo
-        </h3>
-
+    <ion-card class="form-section-card input-card">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="bulb-outline" class="section-icon"></ion-icon>
+            <div class="step-header">
+              <span class="step-number">1</span>
+              Define tu objetivo
+            </div>
+          </div>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="card-content">
         <ion-item
           lines="none"
           [class.invalid-field]="isFieldInvalid('goal')"
-          [class.ion-focused]="publicacionForm.get('goal')?.dirty">
-          <ion-label position="stacked">
+          class="input-item"
+        >
+          <ion-label position="stacked" class="input-label">
             ¿Qué tipo de publicación necesitas? *
           </ion-label>
           <ion-textarea
@@ -55,11 +68,12 @@
             [counter]="true"
             maxlength="500"
             autocapitalize="sentences"
+            class="custom-textarea"
           ></ion-textarea>
         </ion-item>
 
-        <ion-note *ngIf="isFieldInvalid('goal')" color="danger">
-          <ion-icon name="alert-circle-outline"></ion-icon>
+        <ion-note *ngIf="isFieldInvalid('goal')" class="error-message">
+          <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
           El objetivo debe tener al menos 10 caracteres
         </ion-note>
 
@@ -67,25 +81,43 @@
           expand="block"
           (click)="generatePublicacion()"
           [disabled]="isProcessing || publicacionForm.get('goal')?.invalid"
-          class="generate-btn"
+          class="generate-btn action-btn"
         >
-          <ion-spinner *ngIf="isProcessing" name="crescent" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isProcessing" name="send-outline" slot="start"></ion-icon>
+          <ion-spinner *ngIf="isProcessing" name="crescent" slot="start" class="btn-spinner"></ion-spinner>
+          <ion-icon *ngIf="!isProcessing" name="sparkles-outline" slot="start" class="btn-icon"></ion-icon>
           {{ isProcessing ? 'Generando con IA...' : 'Generar Publicación con IA' }}
         </ion-button>
+
+        <div class="ai-features" *ngIf="!isProcessing">
+          <ion-note class="features-note">
+            <strong>Sugerencias para mejores resultados:</strong>
+            <ul>
+              <li>Menciona la plataforma (Instagram, Facebook, etc.)</li>
+              <li>Especifica el tono (formal, casual, emocional)</li>
+              <li>Indica el público objetivo</li>
+              <li>Señala características clave a destacar</li>
+            </ul>
+          </ion-note>
+        </div>
       </ion-card-content>
     </ion-card>
 
     <!-- Paso 2: Editar texto generado -->
-    <ion-card *ngIf="generatedText" class="output-card">
-      <ion-card-content>
-        <h3 class="section-title">
-          <ion-icon name="create-outline"></ion-icon>
-          2. Edita el texto generado
-        </h3>
-
-        <ion-item lines="none" class="ion-focused">
-          <ion-label position="stacked">
+    <ion-card *ngIf="generatedText" class="form-section-card output-card animated-fade-in">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="create-outline" class="section-icon"></ion-icon>
+            <div class="step-header">
+              <span class="step-number">2</span>
+              Edita el texto generado
+            </div>
+          </div>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="card-content">
+        <ion-item lines="none" class="input-item">
+          <ion-label position="stacked" class="input-label">
             Texto de publicación (editable)
           </ion-label>
           <ion-textarea
@@ -95,50 +127,132 @@
             [counter]="true"
             maxlength="2000"
             autocapitalize="sentences"
+            class="custom-textarea editable-text"
           ></ion-textarea>
         </ion-item>
 
         <div class="text-stats" *ngIf="publicacionForm.get('editableText')?.value">
-          <ion-chip color="medium" outline>
-            <ion-icon name="text-outline"></ion-icon>
+          <ion-chip color="medium" outline class="stats-chip">
+            <ion-icon name="text-outline" class="chip-icon"></ion-icon>
             <ion-label>{{ getCharacterCount() }} / 2000 caracteres</ion-label>
+          </ion-chip>
+          <ion-chip [color]="getTextQualityColor()" outline class="stats-chip">
+            <ion-icon [name]="getTextQualityIcon()" class="chip-icon"></ion-icon>
+            <ion-label>{{ getTextQuality() }}</ion-label>
           </ion-chip>
         </div>
 
-        <ion-button
-          expand="block"
-          color="success"
-          (click)="publishPublicacion()"
-          [disabled]="isPublishing || !publicacionForm.get('editableText')?.value"
-          class="publish-btn"
-        >
-          <ion-spinner *ngIf="isPublishing" name="crescent" slot="start"></ion-spinner>
-          <ion-icon *ngIf="!isPublishing" name="cloud-upload-outline" slot="start"></ion-icon>
-          {{ isPublishing ? 'Publicando...' : 'Guardar Publicación' }}
-        </ion-button>
+        <div class="action-buttons">
+          <ion-button
+            expand="block"
+            color="success"
+            (click)="publishPublicacion()"
+            [disabled]="isPublishing || !publicacionForm.get('editableText')?.value"
+            class="publish-btn action-btn"
+          >
+            <ion-spinner *ngIf="isPublishing" name="crescent" slot="start" class="btn-spinner"></ion-spinner>
+            <ion-icon *ngIf="!isPublishing" name="cloud-upload-outline" slot="start" class="btn-icon"></ion-icon>
+            {{ isPublishing ? 'Publicando...' : 'Guardar Publicación' }}
+          </ion-button>
 
-        <ion-note class="helper-note">
-          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <ion-button
+            expand="block"
+            color="medium"
+            fill="outline"
+            (click)="regeneratePublicacion()"
+            [disabled]="isProcessing"
+            class="regenerate-btn"
+          >
+            <ion-icon name="refresh-outline" slot="start" class="btn-icon"></ion-icon>
+            Regenerar
+          </ion-button>
+        </div>
+
+        <ion-note class="helper-note success">
+          <ion-icon name="checkmark-circle-outline" class="helper-icon"></ion-icon>
           Al guardar, se actualizará el campo "publicación" del producto y su fecha de modificación. Puedes editarlo en cualquier momento.
         </ion-note>
       </ion-card-content>
     </ion-card>
 
     <!-- Mensaje cuando no hay texto generado aún -->
-    <ion-card *ngIf="!generatedText && !isProcessing" class="info-card">
-      <ion-card-content>
-        <ion-note class="info-note">
-          <ion-icon name="information-circle-outline"></ion-icon>
-          <div>
-            <strong>¿Cómo funciona?</strong>
-            <p>1. Define qué tipo de publicación necesitas</p>
-            <p>2. La IA generará un texto profesional basado en los datos del producto</p>
-            <p>3. Edita el texto a tu gusto y guárdalo</p>
-            <p>4. La publicación quedará vinculada a este producto</p>
+    <ion-card *ngIf="!generatedText && !isProcessing" class="form-section-card info-card animated-fade-in">
+      <ion-card-header class="card-header">
+        <ion-card-title class="card-title">
+          <div class="title-container">
+            <ion-icon name="information-circle-outline" class="section-icon"></ion-icon>
+            ¿Cómo funciona?
           </div>
-        </ion-note>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="card-content">
+        <div class="steps-guide">
+          <div class="step-item">
+            <div class="step-icon-container">
+              <div class="step-number">1</div>
+              <ion-icon name="bulb-outline" class="step-icon"></ion-icon>
+            </div>
+            <div class="step-content">
+              <h4>Define tu objetivo</h4>
+              <p>Describe qué tipo de publicación necesitas y para qué plataforma</p>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-icon-container">
+              <div class="step-number">2</div>
+              <ion-icon name="sparkles-outline" class="step-icon"></ion-icon>
+            </div>
+            <div class="step-content">
+              <h4>IA genera el contenido</h4>
+              <p>Nuestra inteligencia artificial crea un texto profesional basado en los datos del producto</p>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-icon-container">
+              <div class="step-number">3</div>
+              <ion-icon name="create-outline" class="step-icon"></ion-icon>
+            </div>
+            <div class="step-content">
+              <h4>Edita y personaliza</h4>
+              <p>Ajusta el texto generado según tus preferencias y estilo</p>
+            </div>
+          </div>
+
+          <div class="step-item">
+            <div class="step-icon-container">
+              <div class="step-number">4</div>
+              <ion-icon name="cloud-upload-outline" class="step-icon"></ion-icon>
+            </div>
+            <div class="step-content">
+              <h4>Guarda y usa</h4>
+              <p>La publicación queda vinculada al producto para usar cuando quieras</p>
+            </div>
+          </div>
+        </div>
       </ion-card-content>
     </ion-card>
 
+    <!-- Indicador de progreso de IA -->
+    <div *ngIf="isProcessing" class="ai-processing animated-fade-in">
+      <ion-card class="form-section-card processing-card">
+        <ion-card-content class="card-content">
+          <div class="processing-content">
+            <ion-spinner name="crescent" class="processing-spinner"></ion-spinner>
+            <h3 class="processing-title">Generando contenido con IA</h3>
+            <p class="processing-text">Analizando los datos del producto y creando una publicación optimizada...</p>
+            <div class="processing-dots">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
   </form>
 </ion-content>
+
+ 

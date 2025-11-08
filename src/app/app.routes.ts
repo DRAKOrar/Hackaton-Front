@@ -22,5 +22,9 @@ export const routes: Routes = [
 
   { path: 'sale-form', loadComponent: () => import('./pages/sale-form/sale-form.page').then(m => m.SaleFormPage) },
 
-  { path: '**', redirectTo: 'products' }
+  { path: '**', redirectTo: 'products' },
+  {
+    path: 'expense-form',
+    loadComponent: () => import('./pages/expense-form/expense-form.page').then( m => m.ExpenseFormPage)
+  }
 ];

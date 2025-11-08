@@ -11,9 +11,10 @@ import { FormsModule } from '@angular/forms';
 import { addIcons } from 'ionicons';
 import {
   cartOutline, refreshOutline, arrowDownOutline, trendingUpOutline, trendingDownOutline,
-  cashOutline, calendarOutline, fileTrayOutline, arrowUpCircleOutline, arrowDownCircleOutline, filterOutline, chevronForwardOutline, listOutline } from 'ionicons/icons';
+  cashOutline, calendarOutline, fileTrayOutline, arrowUpCircleOutline, arrowDownCircleOutline, filterOutline, chevronForwardOutline, listOutline, walletOutline } from 'ionicons/icons';
 
 import { TransactionsService, Transaction } from '../../services/transaction-services';
+import { debounceTime, filter, fromEvent, interval, merge, startWith, Subscription } from 'rxjs';
 
 type TxTypeFilter = 'ALL' | 'INCOME' | 'EXPENSE';
 type Period = '7d' | '30d' | 'custom';
@@ -38,7 +39,7 @@ type TxExtra = {
   ]
 })
 export class InicioPage implements OnInit {
-  private tx = inject(TransactionsService);
+   private tx = inject(TransactionsService);
 
   loading = false;
 
@@ -57,21 +58,47 @@ export class InicioPage implements OnInit {
   showTxModal = false;
   selectedTx: (Transaction & TxExtra) | null = null;
 
-   todayDateValue = this.dateValue(new Date());
+  // fecha para ion-datetime (yyyy-MM-dd)
+  todayDateValue = this.dateValue(new Date());
   dateValue(d: Date) {
     const pad = (n: number) => `${n}`.padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   }
+
+  // ---- AUTO REFRESH ----
+  private live = true;                // si la página está activa
+  private liveSub?: Subscription;     // suscripción a triggers
+  pollMs = 20000;                     // intervalo de sondeo (20s)
+  private inFlight = false;           // evita solapes silenciosos
+
   constructor() {
-    addIcons({cartOutline,filterOutline,calendarOutline,chevronForwardOutline,refreshOutline,trendingUpOutline,trendingDownOutline,cashOutline,listOutline,fileTrayOutline,arrowDownOutline,arrowUpCircleOutline,arrowDownCircleOutline});
+    addIcons({cartOutline,walletOutline,filterOutline,calendarOutline,chevronForwardOutline,refreshOutline,trendingUpOutline,trendingDownOutline,cashOutline,listOutline,fileTrayOutline,arrowDownOutline,arrowUpCircleOutline,arrowDownCircleOutline});
   }
 
- ngOnInit(): void {
-    this.fetch();
+  ngOnInit(): void {
+    this.fetch();            // primera carga
+    this.startLiveRefresh(); // inicia el auto-refresco
   }
 
-  fetch(event?: CustomEvent) {
-    this.loading = !event;
+  ngOnDestroy(): void {
+    this.stopLiveRefresh();
+  }
+
+  // Ionic lifecycle (cuando vuelves desde otra página)
+  ionViewWillEnter() {
+    this.live = true;
+    this.fetchSilent();
+  }
+  ionViewDidLeave() {
+    this.live = false;
+  }
+
+  // ------- DATA --------
+  fetch(event?: CustomEvent, silent = false) {
+    if (silent && (this.inFlight || this.loading)) return;
+
+    if (!silent) this.loading = !event;
+    if (silent) this.inFlight = true;
 
     const params = {
       type: this.type === 'ALL' ? undefined : this.type,
@@ -81,38 +108,37 @@ export class InicioPage implements OnInit {
 
     this.tx.getTransactions(params).subscribe({
       next: (list) => {
-        this.transactions = [...list].sort((a, b) =>
-          new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
+        this.transactions = [...list].sort(
+          (a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
         );
         this.computeTotals();
-        this.loading = false;
-        event?.detail.complete();
       },
-      error: () => {
-        this.loading = false;
+      error: () => {},
+      complete: () => {
+        if (!silent) this.loading = false;
+        this.inFlight = false;
         event?.detail.complete();
       }
     });
   }
+  private fetchSilent() { this.fetch(undefined, true); }
 
-   applyFilters() {
+  applyFilters() {
     if (this.period !== 'custom') {
       const days = this.period === '7d' ? 7 : 30;
       this.range.start = this.startOfNDays(days);
       this.range.end = this.endOfToday();
     }
-    // >>> NUEVO: aplicar inmediatamente
-    this.fetch();
+    this.fetch(); // aplicar de una
   }
 
-   onPeriodChange() {
+  onPeriodChange() {
     this.applyFilters(); // ya llama fetch()
   }
 
   refresh(ev: CustomEvent) {
     this.fetch(ev);
   }
-
 
   // -------- MODAL DETALLE --------
   openTx(t: Transaction) {
@@ -136,21 +162,17 @@ export class InicioPage implements OnInit {
     this.totals.net = this.round2(inc - exp);
   }
 
-
   // -------- date helpers --------
   openDate(target: DatePickerTarget) { this.datePicker = target; }
 
-  // >>> CAMBIADO: setStart/setEnd aceptan 'yyyy-MM-dd' y normalizan horas
   setStart(value: string | string[] | null | undefined) {
     const v = Array.isArray(value) ? value[0] : value;
     if (!v) return;
     const d = new Date(`${v}T00:00:00`);
     d.setHours(0, 0, 0, 0);
     this.range.start = d;
-
     if (this.period === 'custom') this.fetch();
   }
-
 
   setEnd(value: string | string[] | null | undefined) {
     const v = Array.isArray(value) ? value[0] : value;
@@ -158,7 +180,6 @@ export class InicioPage implements OnInit {
     const d = new Date(`${v}T23:59:59`);
     d.setHours(23, 59, 59, 999);
     this.range.end = d;
-
     if (this.period === 'custom') this.fetch();
   }
 
@@ -174,24 +195,6 @@ export class InicioPage implements OnInit {
     return d;
   }
 
-  // En tu página de inicio, agrega estos métodos:
-
-// Para las animaciones de los KPIs
-getTrend(type: 'income' | 'expense' | 'net'): number {
-  // Implementa la lógica para calcular tendencias
-  // Por ejemplo, comparar con el periodo anterior
-  return 0; // Cambia por tu lógica real
-}
-
-// Para mejor rendimiento en la lista
-trackByTransaction(index: number, transaction: any): string {
-  return transaction.id || index;
-}
-
-// Animación de entrada para items
-// El CSS ya maneja las animaciones con la clase animated-fade-in
-
-
   // backend espera 'YYYY-MM-DDTHH:mm:ss' sin Z
   naive(date: Date, end = false) {
     const pad = (x: number) => x.toString().padStart(2, '0');
@@ -203,8 +206,11 @@ trackByTransaction(index: number, transaction: any): string {
     const ss = pad(date.getSeconds());
     return `${y}-${m}-${d}T${hh}:${mm}:${ss}`;
   }
- 
-  // -------- formatting --------
+
+  // -------- UX helpers --------
+  getTrend(type: 'income' | 'expense' | 'net'): number { return 0; }
+  trackByTransaction(index: number, tx: any): string { return tx.id || index; }
+
   formatDateShort(d: Date) {
     return d.toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: '2-digit' });
   }
@@ -216,4 +222,26 @@ trackByTransaction(index: number, transaction: any): string {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n || 0);
   }
   round2(n: number) { return Math.round((n + Number.EPSILON) * 100) / 100; }
+
+  // ---- LIVE REFRESH IMPLEMENTATION ----
+  private startLiveRefresh() {
+    const onFocus$    = fromEvent(window, 'focus');
+    const onVisible$  = fromEvent(document, 'visibilitychange').pipe(
+      filter(() => document.visibilityState === 'visible')
+    );
+    const onOnline$   = fromEvent(window, 'online');
+    const tick$       = interval(this.pollMs);
+
+    this.liveSub = merge(onFocus$, onVisible$, onOnline$, tick$)
+      .pipe(
+        startWith(0),          // dispara al iniciar
+        debounceTime(120),     // evita ráfagas
+        filter(() => this.live)
+      )
+      .subscribe(() => this.fetchSilent());
+  }
+
+  private stopLiveRefresh() {
+    this.liveSub?.unsubscribe();
+  }
 }
